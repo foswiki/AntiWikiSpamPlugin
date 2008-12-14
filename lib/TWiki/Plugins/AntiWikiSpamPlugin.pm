@@ -1,6 +1,6 @@
 # Plugin for Foswiki - The Free and Open Source Wiki, http://foswiki.org/
 #
-# Copyright (C) 2005 Sven Dowideit SvenDowideit@wikiring.com
+# Copyright (C) 2005-2008 Sven Dowideit SvenDowideit@wikiring.com
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -18,19 +18,19 @@
 
 ---+ package AntiWikiSpamPlugin
 
-This is the AntiWikiSpam TWiki plugin. it uses the shared Anti-spam regex list to 
+AntiWikiSpam plugin uses the shared Anti-spam regex list to 
 check topic text when saving, refusing to save if it finds a matche.
 
 =cut
 
-package TWiki::Plugins::AntiWikiSpamPlugin;
+package Foswiki::Plugins::AntiWikiSpamPlugin;
 
 use Error qw(:try);
 use strict;
 
 use vars qw( $VERSION $RELEASE $pluginName $debug );
 
-# This should always be $Rev$ so that TWiki can determine the checked-in
+# This should always be $Rev$ so that Foswiki can determine the checked-in
 # status of the plugin. It is used by the build automation tools, so
 # you should leave it alone.
 $VERSION = '$Rev$';
@@ -60,13 +60,13 @@ sub initPlugin {
     my( $topic, $web, $user, $installWeb ) = @_;
 
     # check for Plugins.pm versions
-    if( $TWiki::Plugins::VERSION < 1.026 ) {
-        TWiki::Func::writeWarning( "Version mismatch between $pluginName and Plugins.pm" );
+    if( $Foswiki::Plugins::VERSION < 1.026 ) {
+        Foswiki::Func::writeWarning( "Version mismatch between $pluginName and Plugins.pm" );
         return 0;
     }
 
     #forceUpdate
-    TWiki::Func::registerRESTHandler('forceUpdate', \&forceUpdate);
+    Foswiki::Func::registerRESTHandler('forceUpdate', \&forceUpdate);
 
     # Plugin correctly initialized
     return 1;
@@ -81,7 +81,7 @@ write debug output if the debug flag is set
 =cut
 
 sub writeDebug {
-  TWiki::Func::writeDebug( "- $pluginName - ".$_[0]) if $debug;
+  Foswiki::Func::writeDebug( "- $pluginName - ".$_[0]) if $debug;
 }
 
 =pod
@@ -90,7 +90,7 @@ sub writeDebug {
    * =$text= - text _with embedded meta-data tags_
    * =$topic= - the name of the topic in the current CGI query
    * =$web= - the name of the web in the current CGI query
-   * =$meta= - the metadata of the topic being saved, represented by a TWiki::Meta object 
+   * =$meta= - the metadata of the topic being saved, represented by a Foswiki::Meta object 
 
 This handler is called just before the save action, checks 
 
@@ -122,15 +122,14 @@ sub beforeAttachmentSaveHandler
 {
     ### my ( $attachmentAttr, $topic, $web ) = @_;   # do not uncomment, use $_[0], $_[1]... instead
     my $attachmentName = $_[0]->{"attachment"};
-    my $tmpFilename    = $_[0]->{"tmpFilename"}
-                      || $_[0]->{"file"};  # workaround for TWiki 4.0.2 bug
-    my $text = TWiki::Func::readFile( $tmpFilename );
+    my $tmpFilename    = $_[0]->{"tmpFilename"};
+    my $text = Foswiki::Func::readFile( $tmpFilename );
 
     #from BlackListPlugin
     # check for evil eval() spam in <script>
     if( $text =~ /<script.*?eval *\(.*?<\/script>/gis ) { #TODO: there's got to be a better way to do this.
-        TWiki::Func::writeWarning("detected possible javascript exploit at attachment in in $_[2].$_[1]");
-        throw TWiki::OopsException( 'attention', def=>'attach_error',
+        Foswiki::Func::writeWarning("detected possible javascript exploit at attachment in in $_[2].$_[1]");
+        throw Foswiki::OopsException( 'attention', def=>'attach_error',
             params => 'The attachment has been rejected as it contains a possible javascript eval exploit.');
     }
 
@@ -161,19 +160,19 @@ sub saveWorkFile($$) {
     my $fileName = shift;
     my $text = shift;
 
-    my $workarea = TWiki::Func::getWorkArea($pluginName);
-    TWiki::Func::saveFile($workarea.'/'.$fileName , $text);
+    my $workarea = Foswiki::Func::getWorkArea($pluginName);
+    Foswiki::Func::saveFile($workarea.'/'.$fileName , $text);
 }
 sub readWorkFile($) {
     my $fileName = shift;
 
-    my $workarea = TWiki::Func::getWorkArea($pluginName);
-    return TWiki::Func::readFile($workarea.'/'.$fileName);
+    my $workarea = Foswiki::Func::getWorkArea($pluginName);
+    return Foswiki::Func::readFile($workarea.'/'.$fileName);
 }
 sub fileExists($) {
     my $fileName = shift;
 
-    my $workarea = TWiki::Func::getWorkArea($pluginName);
+    my $workarea = Foswiki::Func::getWorkArea($pluginName);
     return (-e $workarea.'/'.$fileName);
 }
 
@@ -192,7 +191,7 @@ sub downloadRegexUpdate {
     my $timesUp;
     my $topicExists = fileExists(${pluginName}.'_regexs');
     if ($topicExists) {
-        my $getListTimeOut = TWiki::Func::getPluginPreferencesValue( 'GETLISTTIMEOUT' ) || 61;
+        my $getListTimeOut = Foswiki::Func::getPluginPreferencesValue( 'GETLISTTIMEOUT' ) || 61;
         #has it been more than $getListTimeOut minutes since the last get?
         my $lastTimeWeCheckedForUpdate = readWorkFile(${pluginName}.'_timeOfLastCheck');
         writeDebug("time > ($lastTimeWeCheckedForUpdate + ($getListTimeOut * 60))");
@@ -206,7 +205,7 @@ sub downloadRegexUpdate {
   if ( $lock eq '' ) {
       writeDebug("downloading new spam data");
       saveWorkFile(${pluginName}.'_lock', 'lock');
-      my $listUrl = TWiki::Func::getPluginPreferencesValue( 'ANTISPAMREGEXLISTURL' );
+      my $listUrl = Foswiki::Func::getPluginPreferencesValue( 'ANTISPAMREGEXLISTURL' );
       my $list = includeUrl($listUrl);
       if (defined ($list)) {
           #writeDebug("$list");
@@ -230,74 +229,8 @@ simplified version of INCLUDE
 sub includeUrl($) {
     my $theUrl = shift;
 
-    return TWiki::Func::getExternalResource($theUrl)->content()
-        if $TWiki::Plugins::VERSION >= 1.2;
-
-    my $text = '';
-    my $host = '';
-    my $port = 80;
-    my $path = '';
-    my $user = '';
-    my $pass = '';
-    my $protocol = 'http';
-
-
-    if( $theUrl =~ /(https?)\:\/\/(.+)\:(.+)\@([^\:]+)\:([0-9]+)(\/.*)/ ) {
-        ( $protocol, $user, $pass, $host, $port, $path ) = ( $1, $2, $3, $4, $5, $6 );
-    } elsif( $theUrl =~ /(https?)\:\/\/(.+)\:(.+)\@([^\/]+)(\/.*)/ ) {
-        ( $protocol, $user, $pass, $host, $path ) = ( $1, $2, $3, $4, $5 );
-    } elsif( $theUrl =~ /(https?)\:\/\/([^\:]+)\:([0-9]+)(\/.*)/ ) {
-        ( $protocol, $host, $port, $path ) = ( $1, $2, $3, $4 );
-    } elsif( $theUrl =~ /(https?)\:\/\/([^\/]+)(\/.*)/ ) {
-        ( $protocol, $host, $path ) = ( $1, $2, $3 );
-    } else {
-#        $text = TWiki::Plugins::SESSION->inlineAlert( 'alerts', 'bad_protocol', $theUrl );
-        return $text;
-    }
-
-    try {
-        $text = getUrl( $protocol, $host, $port, $path, $user, $pass );
-        $text =~ s/\r\n/\n/gs;
-        $text =~ s/\r/\n/gs;
-        $text =~ s/^(.*?\n)\n(.*)/$2/s;
-    } catch Error with {
-        my $e = shift->stringify();
-        TWiki::Func::writeWarning("$pluginName - $e");
-        writeDebug("$pluginName - $e");
-        print STDERR "$pluginName - $e";
-    };
-    
-    return $text;
+    return Foswiki::Func::getExternalResource($theUrl)->content();
 }
-
-=pod
-
----++ getUrl($protocol, $host, $port, $path, $user, $pass) -> $text
-
-Local wrapper for different interfaces in TWiki<4.0, TWiki-4.0 and TWiki-4.1
-This would not be necessary if there was a TWiki::Func::getUrl() API
-
-=cut
-
-sub getUrl {
-  my ($protocol, $host, $port, $path, $user, $pass) = @_;
-  
-  # TWiki 01 Sep 2004 and older
-  return TWiki::Net::getUrl($host, $port, $path, $user, $pass) 
-    if $TWiki::Plugins::VERSION < 1.1;
-  
-  # TWiki 4.0
-  return $TWiki::Plugins::SESSION->{net}->getUrl($host, $port, $path, $user, $pass) 
-    if $TWiki::Plugins::VERSION < 1.11;
-  
-  # TWiki 4.1
-  return $TWiki::Plugins::SESSION->{net}->getUrl($protocol, $host, $port, $path, $user, $pass)
-    if $TWiki::Plugins::VERSION < 1.2;
-
-  die "should not be here - TWiki 4.2 defines TWiki::Func::getExternalResource";
-}
-
-
 
 =pod 
 
@@ -316,14 +249,14 @@ sub checkText {
 
   # do localspamlist first
   my $regexWeb;
-  my $regexTopic = TWiki::Func::getPluginPreferencesValue( 'LOCALANTISPAMREGEXLISTTOPIC' );
-  my $twikiWeb = TWiki::Func::getTwikiWebname();
-  ($regexWeb, $regexTopic) = TWiki::Func::normalizeWebTopicName($twikiWeb, $regexTopic);
-  if (TWiki::Func::topicExists($regexWeb, $regexTopic) ) {
+  my $regexTopic = Foswiki::Func::getPluginPreferencesValue( 'LOCALANTISPAMREGEXLISTTOPIC' );
+  my $twikiWeb = Foswiki::Func::getTwikiWebname();
+  ($regexWeb, $regexTopic) = Foswiki::Func::normalizeWebTopicName($twikiWeb, $regexTopic);
+  if (Foswiki::Func::topicExists($regexWeb, $regexTopic) ) {
       if (($topic eq $regexTopic) && ($web eq $regexWeb)) {
           return; #don't check the anti-spam topic
       }
-      my ( $meta, $regexs) = TWiki::Func::readTopic($regexWeb, $regexTopic);
+      my ( $meta, $regexs) = Foswiki::Func::readTopic($regexWeb, $regexTopic);
       checkTextUsingRegex($web, $topic, $regexs, $_[0]);
   }
 
@@ -353,9 +286,9 @@ sub checkTextUsingRegex {
         $regex =~ s/\s+$//;
         if ($regex ne '') {
             if ( $_[1] =~ /$regex/i ) {
-                TWiki::Func::writeWarning("detected spam at $web.$topic (regex=$regex)");
+                Foswiki::Func::writeWarning("detected spam at $web.$topic (regex=$regex)");
                 # TODO: make this a nicer error, or make its own template
-                throw TWiki::OopsException( 'attention', def=>'save_error', 
+                throw Foswiki::OopsException( 'attention', def=>'save_error', 
                     params => "The topic $web.$topic has been rejected as it may contain spam.");
             }
         }

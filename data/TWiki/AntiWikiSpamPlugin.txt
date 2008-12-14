@@ -11,7 +11,7 @@ list, it _only_ refuses to save it.
 *Major premise is not to create any unnecessary load on the server and not to use excess server resources by holding connections open.*
 
 All its processing is _only_ done on save, or on attach.
-(Foswiki:Extensions/BlackListPlugin does alot of processing on _every_ twiki script,
+(Foswiki:Extensions/BlackListPlugin does alot of processing on _every_ topic operation,
 including view)
 
 It uses a timeout on save to check if the list has changed, so if there are no
@@ -61,13 +61,12 @@ __Note:__ You do not need to install anything on the browser to use this plugin.
 |  Plugin Author: | TWiki:Main.SvenDowideit - http:///www.WikiRing.com|
 |  Plugin Version: | 4 Sept 2007 (V1.2) |
 |  Change History: | <!-- versions below in reverse order -->&nbsp; |
+| 14 Dev 2008: | updated for Foswiki v1.0 |
 |  4 Sept 2007: | updated to 4.2 |
 |  22 Jul 2006: | resurected it for TWiki 4.0 due to demand for a low resource AntiSpam solution |
 |  22 Aug 2005: | Initial version |
-|  TWiki Dependency: | $TWiki::Plugins::VERSION 1.024 |
 |  CPAN Dependencies: | none |
-|  Other Dependencies: | none |
-|  Perl Version: | 5.005 |
+|  Other Dependencies: | internet acces to update the spam list |
 |  License: | GPL ([[http://www.gnu.org/copyleft/gpl.html][GNU General Public License]]) |
 |  Foswiki:Extensions/Benchmark: | %SYSTEMWEB%.GoodStyle nn%, %SYSTEMWEB%.FormattedSearch nn%, %TOPIC% nn% |
 |  Plugin Home: | http://foswiki.org/Extensions/%TOPIC% |
