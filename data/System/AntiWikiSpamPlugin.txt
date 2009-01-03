@@ -59,7 +59,7 @@ __Note:__ You do not need to install anything on the browser to use this plugin.
 ---++ Plugin Info
 
 |  Plugin Author: | Foswiki:Main.SvenDowideit - http:///www.WikiRing.com|
-|  Plugin Version: | 4 Sept 2007 (V1.2) |
+|  Plugin Version: | V1.3 |
 |  Change History: | <!-- versions below in reverse order -->&nbsp; |
 | 14 Dev 2008: | updated for Foswiki v1.0 |
 |  4 Sept 2007: | updated to 4.2 |
