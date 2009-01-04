@@ -1,7 +1,13 @@
-%META:TOPICINFO{author="SvenDowideit" date="1124819774" format="1.1" version="1.4"}%
+---+!! !AntiWikiSpamPlugin
+<!--
+One line description, required for extensions repository catalog.
+   * Set SHORTDESCRIPTION = lightweight wiki spam prevention
+-->
+%SHORTDESCRIPTION%
 
----+!! <nop>%TOPIC%
+%TOC%
 
+---++ Stop your wiki getting spammed
 This plugin attempts to reduce the instance of Wiki Spam by using the
 [[http://moinmoin.wikiwikiweb.de/][MoinMoin]]
 [[http://moinmoin.wikiwikiweb.de/AntiSpamGlobalSolution][AntiSpamGlobalSolution]]
@@ -19,59 +25,23 @@ saves, there is no un-needed network traffic.
 
 To manually update the list, click [[%SCRIPTURLPATH{"rest"}%/%TOPIC%/forceUpdate][here]]
 
-%TOC%
+---++ Installation Instructions
 
----++ Plugin Settings
+%$INSTALL_INSTRUCTIONS%
 
-Plugin settings are stored as preferences variables. To reference a plugin setting write ==%<nop>&lt;plugin&gt;_&lt;setting&gt;%==, i.e. ==%<nop>INTERWIKIPLUGIN_SHORTDESCRIPTION%==
-
-   * One line description, is shown in the %SYSTEMWEB%.TextFormattingRules topic:
-      * Set SHORTDESCRIPTION = prevents registered Wiki Spam from being saved
-
-   * where to get the regex list to check for
-      * Set ANTISPAMREGEXLISTURL = http://arch.thinkmo.de/cgi-bin/spam-merge
-
-   * time in minutes between attempts to get a new version of the list
-      * Set GETLISTTIMEOUT = 60
-
-   * Local spam list (checked before the larger shared one)
-      * Set LOCALANTISPAMREGEXLISTTOPIC = %SYSTEMWEB%.LocalAntiWikiSpamPluginList
- 
-   * to ensure that only <nop>WikiAdmins can make changes here
-      * Set ALLOWTOPICCHANGE = %MAINWEB%.AdminGroup
+---++ Info
 
 
-
----++ Plugin Installation Instructions
-
-__Note:__ You do not need to install anything on the browser to use this plugin. The following instructions are for the administrator who installs the plugin on the server where Foswiki is running. 
-
-   * Download the ZIP file from the Plugin web (see below)
-   * Unzip ==%TOPIC%.zip== in your twiki installation directory. Content:
-     | *File:* | *Description:* |
-     | ==data/System/%TOPIC%.txt== | Plugin topic |
-     | ==data/System/%TOPIC%.txt,v== | Plugin topic repository |
-     | ==lib/Foswiki/Plugins/%TOPIC%.pm== | Plugin Perl module |
-   * Visit =configure= in your Wiki installation, and enable the plugin in the {Plugins} section.
-   * Test if the installation was successful:
-
-
----++ Plugin Info
-
-|  Plugin Author: | Foswiki:Main.SvenDowideit - http:///www.WikiRing.com|
-|  Plugin Version: | V1.3 |
+|  Author(s): | Foswiki:Main.SvenDowideit - http://fosiki.com |
+|  Copyright: | &copy; 2005-2009 SvenDowideit@fosiki.com |
+|  License: | [[http://www.gnu.org/licenses/gpl3.html][GPL 3 (Gnu General Public License)]] |
+|  Version: | %$VERSION% |
 |  Change History: | <!-- versions below in reverse order -->&nbsp; |
-| 14 Dev 2008: | updated for Foswiki v1.0 |
-|  4 Sept 2007: | updated to 4.2 |
+|  4 Jan 2009: | updated for Foswiki v1.0 |
+|  4 Sep 2007: | updated to 4.2 |
 |  22 Jul 2006: | resurected it for TWiki 4.0 due to demand for a low resource AntiSpam solution |
 |  22 Aug 2005: | Initial version |
-|  CPAN Dependencies: | none |
-|  Other Dependencies: | internet acces to update the spam list |
-|  License: | GPL ([[http://www.gnu.org/copyleft/gpl.html][GNU General Public License]]) |
-|  Foswiki:Extensions/Benchmark: | %SYSTEMWEB%.GoodStyle nn%, %SYSTEMWEB%.FormattedSearch nn%, %TOPIC% nn% |
-|  Plugin Home: | http://foswiki.org/Extensions/%TOPIC% |
-|  Feedback: | http://foswiki.org/Extensions/%TOPIC%Dev |
-|  Appraisal: | http://foswiki.org/Extensions/%TOPIC%Appraisal |
+|  Dependencies: | %$DEPENDENCIES% |
+|  Home page: | http://foswiki.org/bin/view/Extensions/AntiWikiSpamPlugin |
 
-__Related Topics:__ %SYSTEMWEB%.DefaultPreferences, %USERSWEB%.SitePreferences, [[%SYSTEMWEB%.Plugins][Plugins]]
-
+<!-- Do _not_ attempt to edit this topic; it is auto-generated. -->

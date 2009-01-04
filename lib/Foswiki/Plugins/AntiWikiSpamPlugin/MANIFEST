@@ -1,2 +1,4 @@
-data/System/AntiWikiSpamPlugin.txt 
-lib/Foswiki/Plugins/AntiWikiSpamPlugin.pm 
+# Release manifest for AntiWikiSpamPlugin
+data/System/AntiWikiSpamPlugin.txt 0644 Documentation
+lib/Foswiki/Plugins/AntiWikiSpamPlugin.pm 0644 Perl module
+lib/Foswiki/Plugins/AntiWikiSpamPlugin/Config.spec 0644 Settings

@@ -12,57 +12,87 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details, published at
 # http://www.gnu.org/copyleft/gpl.html
-#
 
 =pod
 
----+ package AntiWikiSpamPlugin
+---+ package Foswiki::Plugins::AntiWikiSpamPlugin
 
 AntiWikiSpam plugin uses the shared Anti-spam regex list to 
-check topic text when saving, refusing to save if it finds a matche.
+check topic text when saving, refusing to save if it finds a match.
 
 =cut
+
 
 package Foswiki::Plugins::AntiWikiSpamPlugin;
 
 use Error qw(:try);
 use strict;
 
-use vars qw( $VERSION $RELEASE $pluginName $debug );
+require Foswiki::Func;    # The plugins API
+require Foswiki::Plugins; # For the API version
 
-# This should always be $Rev$ so that Foswiki can determine the checked-in
+# $VERSION is referred to by Foswiki, and is the only global variable that
+# *must* exist in this package.
+# This should always be $Rev: 1340 $ so that Foswiki can determine the checked-in
 # status of the plugin. It is used by the build automation tools, so
 # you should leave it alone.
-$VERSION = '$Rev$';
+our $VERSION = '$Rev: 1340 $';
 
 # This is a free-form string you can use to "name" your own plugin version.
 # It is *not* used by the build automation tools, but is reported as part
 # of the version number in PLUGINDESCRIPTIONS.
-$RELEASE = '1.3';
+our $RELEASE = '$Date: 2008-12-15 04:49:56 +1100 (Mon, 15 Dec 2008) $';
 
-$pluginName = 'AntiWikiSpamPlugin';    # Name of this Plugin
+# Short description of this plugin
+# One line description, is shown in the %SYSTEMWEB%.TextFormattingRules topic:
+our $SHORTDESCRIPTION = 'lightweight wiki spam prevention';
 
-$debug = 1;                            # toggle me
+# You must set $NO_PREFS_IN_TOPIC to 0 if you want your plugin to use
+# preferences set in the plugin topic. This is required for compatibility
+# with older plugins, but imposes a significant performance penalty, and
+# is not recommended. Instead, leave $NO_PREFS_IN_TOPIC at 1 and use
+# =$Foswiki::cfg= entries set in =LocalSite.cfg=, or if you want the users
+# to be able to change settings, then use standard Foswiki preferences that
+# can be defined in your %USERSWEB%.SitePreferences and overridden at the web
+# and topic level.
+our $NO_PREFS_IN_TOPIC = 1;
 
-=pod
+our $pluginName = 'AntiWikiSpamPlugin';
+our $debug = 0;
 
----++ initPlugin($topic, $web, $user, $installWeb) -> $boolean
+=begin TML
+
+---++ initPlugin($topic, $web, $user) -> $boolean
    * =$topic= - the name of the topic in the current CGI query
    * =$web= - the name of the web in the current CGI query
    * =$user= - the login name of the user
-   * =$installWeb= - the name of the web the plugin is installed in
+   * =$installWeb= - the name of the web the plugin topic is in
+     (usually the same as =$Foswiki::cfg{SystemWebName}=)
 
-not used for plugins specific functionality at present
+*REQUIRED*
+
+Called to initialise the plugin. If everything is OK, should return
+a non-zero value. On non-fatal failure, should write a message
+using =Foswiki::Func::writeWarning= and return 0. In this case
+%<nop>FAILEDPLUGINS% will indicate which plugins failed.
+
+In the case of a catastrophic failure that will prevent the whole
+installation from working safely, this handler may use 'die', which
+will be trapped and reported in the browser.
+
+__Note:__ Please align macro names with the Plugin name, e.g. if
+your Plugin is called !FooBarPlugin, name macros FOOBAR and/or
+FOOBARSOMETHING. This avoids namespace issues.
 
 =cut
 
 sub initPlugin {
-    my ( $topic, $web, $user, $installWeb ) = @_;
+    my( $topic, $web, $user, $installWeb ) = @_;
 
     # check for Plugins.pm versions
-    if ( $Foswiki::Plugins::VERSION < 1.026 ) {
-        Foswiki::Func::writeWarning(
-            "Version mismatch between $pluginName and Plugins.pm");
+    if( $Foswiki::Plugins::VERSION < 2.0 ) {
+        Foswiki::Func::writeWarning( 'Version mismatch between ',
+                                     __PACKAGE__, ' and Plugins.pm' );
         return 0;
     }
 
@@ -86,17 +116,24 @@ sub writeDebug {
     return;
 }
 
-=pod
+=begin TML
 
 ---++ beforeSaveHandler($text, $topic, $web, $meta )
    * =$text= - text _with embedded meta-data tags_
    * =$topic= - the name of the topic in the current CGI query
    * =$web= - the name of the web in the current CGI query
-   * =$meta= - the metadata of the topic being saved, represented by a Foswiki::Meta object 
+   * =$meta= - the metadata of the topic being saved, represented by a Foswiki::Meta object.
 
-This handler is called just before the save action, checks 
+This handler is called each time a topic is saved.
 
-__NOTE:__ meta-data is embedded in $text (using %META: tags)
+*NOTE:* meta-data is embedded in =$text= (using %META: tags). If you modify
+the =$meta= object, then it will override any changes to the meta-data
+embedded in the text. Modify *either* the META in the text *or* the =$meta=
+object, never both. You are recommended to modify the =$meta= object rather
+than the text, as this approach is proof against changes in the embedded
+text format.
+
+*Since:* Foswiki::Plugins::VERSION = 2.0
 
 =cut
 
@@ -114,11 +151,22 @@ sub beforeSaveHandler {
     return;
 }
 
-=pod
+=begin TML
 
----++ beforeAttachmentSaveHandler($attachmentAttr, $topic, $web)
+---++ beforeAttachmentSaveHandler(\%attrHash, $topic, $web )
+   * =\%attrHash= - reference to hash of attachment attribute values
+   * =$topic= - the name of the topic in the current CGI query
+   * =$web= - the name of the web in the current CGI query
+This handler is called once when an attachment is uploaded. When this
+handler is called, the attachment has *not* been recorded in the database.
 
-checks attachments for javascript exploits and spam
+The attributes hash will include at least the following attributes:
+   * =attachment= => the attachment name
+   * =comment= - the comment
+   * =user= - the user id
+   * =tmpFilename= - name of a temporary file containing the attachment data
+
+*Since:* Foswiki::Plugins::VERSION = 2.0
 
 =cut
 
@@ -207,7 +255,7 @@ sub downloadRegexUpdate {
         my $topicExists = fileExists( ${pluginName} . '_regexs' );
         if ($topicExists) {
             my $getListTimeOut =
-              Foswiki::Func::getPluginPreferencesValue('GETLISTTIMEOUT') || 61;
+              $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{GETLISTTIMEOUT} || 61;
 
             #has it been more than $getListTimeOut minutes since the last get?
             my $lastTimeWeCheckedForUpdate =
@@ -229,7 +277,7 @@ sub downloadRegexUpdate {
         writeDebug("downloading new spam data");
         saveWorkFile( ${pluginName} . '_lock', 'lock' );
         my $listUrl =
-          Foswiki::Func::getPluginPreferencesValue('ANTISPAMREGEXLISTURL');
+          $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{ANTISPAMREGEXLISTURL};
         my $list = Foswiki::Func::getExternalResource($listUrl)->content();
         if ( defined($list) ) {
 
@@ -264,7 +312,7 @@ sub checkText {
     # do localspamlist first
     my $regexWeb;
     my $regexTopic =
-      Foswiki::Func::getPluginPreferencesValue('LOCALANTISPAMREGEXLISTTOPIC');
+      $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{LOCALANTISPAMREGEXLISTTOPIC};
     my $twikiWeb = Foswiki::Func::getTwikiWebname();
     ( $regexWeb, $regexTopic ) =
       Foswiki::Func::normalizeWebTopicName( $twikiWeb, $regexTopic );
@@ -348,3 +396,13 @@ sub getCgiAction {
 }
 
 1;
+__END__
+This copyright information applies to the AntiWikiSpamPlugin:
+
+# Plugin for Foswiki - The Free and Open Source Wiki, http://foswiki.org/
+#
+# AntiWikiSpamPlugin is # This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+#
+# For licensing info read LICENSE file in the Foswiki root.
