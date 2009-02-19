@@ -22,14 +22,13 @@ check topic text when saving, refusing to save if it finds a match.
 
 =cut
 
-
 package Foswiki::Plugins::AntiWikiSpamPlugin;
 
 use Error qw(:try);
 use strict;
 
-require Foswiki::Func;    # The plugins API
-require Foswiki::Plugins; # For the API version
+require Foswiki::Func;       # The plugins API
+require Foswiki::Plugins;    # For the API version
 
 # $VERSION is referred to by Foswiki, and is the only global variable that
 # *must* exist in this package.
@@ -57,8 +56,10 @@ our $SHORTDESCRIPTION = 'lightweight wiki spam prevention';
 # and topic level.
 our $NO_PREFS_IN_TOPIC = 1;
 
-our $pluginName = 'AntiWikiSpamPlugin';
-our $debug = 0;
+our $pluginName  = 'AntiWikiSpamPlugin';
+our $debug       = 0;
+our $bypassFail  = undef;
+our $sensitivity = undef;
 
 =begin TML
 
@@ -87,17 +88,19 @@ FOOBARSOMETHING. This avoids namespace issues.
 =cut
 
 sub initPlugin {
-    my( $topic, $web, $user, $installWeb ) = @_;
+    my ( $topic, $web, $user, $installWeb ) = @_;
 
     # check for Plugins.pm versions
-    if( $Foswiki::Plugins::VERSION < 2.0 ) {
+    if ( $Foswiki::Plugins::VERSION < 2.0 ) {
         Foswiki::Func::writeWarning( 'Version mismatch between ',
-                                     __PACKAGE__, ' and Plugins.pm' );
+            __PACKAGE__, ' and Plugins.pm' );
         return 0;
     }
 
     #forceUpdate
     Foswiki::Func::registerRESTHandler( 'forceUpdate', \&forceUpdate );
+
+    writeDebug(" AntiWikiSpam is initialized ");
 
     # Plugin correctly initialized
     return 1;
@@ -145,7 +148,9 @@ sub beforeSaveHandler {
     my $action = getCgiAction();
     return unless $action =~ /^save/;
 
-    writeDebug("beforeSaveHandler( $_[2].$_[1] )");
+    getPluginPrefs();    # Process preference settings for the plugin
+
+    writeDebug("beforeSaveHandler( $_[2].$_[1] ) ");
     downloadRegexUpdate();
     checkText( $_[2], $_[1], $_[0] );
     return;
@@ -175,22 +180,32 @@ sub beforeAttachmentSaveHandler {
     my $attachmentName = $_[0]->{"attachment"};
     my $tmpFilename    = $_[0]->{"tmpFilename"};
     my $text           = Foswiki::Func::readFile($tmpFilename);
+    my $wikiName       = Foswiki::Func::getWikiName();
+
+    getPluginPrefs();
 
     #from BlackListPlugin
     # check for evil eval() spam in <script>
     if ( $text =~ /<script.*?eval *\(.*?<\/script>/gis )
     {    #TODO: there's got to be a better way to do this.
         Foswiki::Func::writeWarning(
-"detected possible javascript exploit at attachment in in $_[2].$_[1]"
+"detected possible javascript exploit by $wikiName at attachment in in $_[2].$_[1]  bypass = $bypassFail"
         );
-        throw Foswiki::OopsException(
-            'attention',
-            def   => 'attach_error',
-            web   => $_[2],
-            topic => $_[1],
-            params =>
+        if (
+            !$bypassFail &&    # User is not in trusted group
+            $sensitivity > 0
+          )
+        {                      # and Sensitivity not set to simulate
+
+            throw Foswiki::OopsException(
+                'attention',
+                def   => 'attach_error',
+                web   => $_[2],
+                topic => $_[1],
+                params =>
 'The attachment has been rejected as it contains a possible javascript eval exploit.'
-        );
+            );
+        }
     }
 
     downloadRegexUpdate();
@@ -255,7 +270,8 @@ sub downloadRegexUpdate {
         my $topicExists = fileExists( ${pluginName} . '_regexs' );
         if ($topicExists) {
             my $getListTimeOut =
-              $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{GETLISTTIMEOUT} || 61;
+              $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{GETLISTTIMEOUT}
+              || 61;
 
             #has it been more than $getListTimeOut minutes since the last get?
             my $lastTimeWeCheckedForUpdate =
@@ -266,15 +282,14 @@ sub downloadRegexUpdate {
             $timesUp =
               time > ( $lastTimeWeCheckedForUpdate + ( $getListTimeOut * 60 ) );
         }
-        return unless ($timesUp || !$topicExists);
+        return unless ( $timesUp || !$topicExists );
     }
 
-    writeDebug("downloading new spam data");
     my $lock =
       readWorkFile( ${pluginName} . '_lock' )
       ;    # SMELL: that's no good way to do locking
     if ( $lock eq '' ) {
-        writeDebug("downloading new spam data");
+        writeDebug("beginning download of new spam data");
         saveWorkFile( ${pluginName} . '_lock', 'lock' );
         my $listUrl =
           $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{ANTISPAMREGEXLISTURL};
@@ -288,7 +303,7 @@ sub downloadRegexUpdate {
         saveWorkFile( ${pluginName} . '_lock', '' );
     }
     else {
-        writeDebug("downloading new spam data");
+        writeDebug("download blocked due to lock");
     }
     return;
 }
@@ -313,11 +328,12 @@ sub checkText {
     my $regexWeb;
     my $regexTopic =
       $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{LOCALANTISPAMREGEXLISTTOPIC};
-    my $twikiWeb = Foswiki::Func::getTwikiWebname();
+    my $systemWeb = $Foswiki::cfg{SystemWebName};
     ( $regexWeb, $regexTopic ) =
-      Foswiki::Func::normalizeWebTopicName( $twikiWeb, $regexTopic );
+      Foswiki::Func::normalizeWebTopicName( $systemWeb, $regexTopic );
     if ( Foswiki::Func::topicExists( $regexWeb, $regexTopic ) ) {
         if ( ( $topic eq $regexTopic ) && ( $web eq $regexWeb ) ) {
+            writeDebug("Bypass - anti-spam topic");
             return;    #don't check the anti-spam topic
         }
         my ( $meta, $regexs ) =
@@ -340,9 +356,11 @@ check a text for spam using a given regex; throws an oops exception if it detect
 =cut
 
 sub checkTextUsingRegex {
+
     #my ($web, $topic, $regexs, $text) = @_;
     my $web   = shift;
     my $topic = shift;
+    my $hits  = 0;
 
     #load text as a set of regex's, and eval
     foreach my $regexLine ( split( /\n/, $_[0] ) ) {
@@ -351,19 +369,32 @@ sub checkTextUsingRegex {
         $regex =~ s/^\s+//;
         $regex =~ s/\s+$//;
         if ( $regex ne '' ) {
-            if ( $_[1] =~ /$regex/i ) {
-                Foswiki::Func::writeWarning(
-                    "detected spam at $web.$topic (regex=$regex)");
 
-                # TODO: make this a nicer error, or make its own template
-                throw Foswiki::OopsException(
-                    'attention',
-                    def   => 'save_error',
-                    web   => $web,
-                    topic => $topic,
-                    params =>
-"The text of topic $web.$topic has been rejected as it may contain spam."
+            #writeDebug ("Checking for $regex ");
+            if ( $_[1] =~ /$regex/i ) {
+                my $wikiName = Foswiki::Func::getWikiName();
+                Foswiki::Func::writeWarning(
+"detected spam from user $wikiName at $web.$topic (regex=$regex) bypass=$bypassFail"
                 );
+                $hits++;
+                if (
+                    !$bypassFail &&    # User is not in trusted group
+                    $sensitivity > 0
+                    &&                 # and Sensitivity not set to simulate
+                    $hits >= $sensitivity
+                  )
+                {                      # and sensitivity matches hits.
+
+                    # TODO: make this a nicer error, or make its own template
+                    throw Foswiki::OopsException(
+                        'attention',
+                        def   => 'save_error',
+                        web   => $web,
+                        topic => $topic,
+                        params =>
+"The text of topic $web.$topic has been rejected as it may contain spam."
+                    );
+                }
             }
         }
     }
@@ -393,6 +424,33 @@ sub getCgiAction {
     #writeDebug("theAction=$theAction");
 
     return $theAction;
+}
+
+=pod 
+
+---++ getPluginPrefs() -> 
+
+Retrieve preference settings for the AntiWikiSpam  plugin.
+
+=cut
+
+sub getPluginPrefs {
+    my $bypassGroup =
+      $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{ANTISPAMBYPASSGROUP};
+    $bypassFail = $bypassGroup && Foswiki::Func::isGroupMember("$bypassGroup");
+    if (
+        defined $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}
+        {ANTISPAMSENSITIVITY} )
+    {
+        $sensitivity =
+          $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{ANTISPAMSENSITIVITY};
+    }
+    else {
+        $sensitivity = 1;
+    }
+    writeDebug(
+"beforeSaveHandler: bypassGroup = $bypassGroup,   bypassFail = $bypassFail sensitivity = $sensitivity"
+    );
 }
 
 1;
