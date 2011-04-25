@@ -69,7 +69,7 @@ To cause a true failure, remove the VIEW and CHANGE restrictions to the topic an
 |  License: | [[http://www.gnu.org/licenses/gpl3.html][GPL 3 (Gnu General Public License)]] |
 |  Version: | %$VERSION% |
 |  Change History: | <!-- versions below in reverse order -->&nbsp; |
-|  25 Apr 2011: | Foswikitask:Item1091 - add whitelist, Foswikitask:Item10680 - Improve local regex capability |
+|  25 Apr 2011: | Foswikitask:Item1091 - add whitelist, <br />Foswikitask:Item1580 - also process comments, <br />Foswikitask:Item10680 - Improve local regex capability |
 |  4 Jan 2009: | updated for Foswiki v1.0 |
 |  4 Sep 2007: | updated to 4.2 |
 |  22 Jul 2006: | resurected it for TWiki 4.0 due to demand for a low resource AntiSpam solution |

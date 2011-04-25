@@ -16,4 +16,6 @@ myspamcheck
 
 viagrabuy
 
+%COMMENT{}%
+
 -- %USERSWEB%.ProjectContributor - 15 Apr 2011
