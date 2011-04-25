@@ -1,17 +1,6 @@
-# Plugin for Foswiki - The Free and Open Source Wiki, http://foswiki.org/
+# See bottom of file for license and copyright information
 #
-# Copyright (C) 2005-2008 Sven Dowideit SvenDowideit@wikiring.com
-#
-# This program is free software; you can redistribute it and/or
-# modify it under the terms of the GNU General Public License
-# as published by the Free Software Foundation; either version 2
-# of the License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details, published at
-# http://www.gnu.org/copyleft/gpl.html
+# See Plugin topic for history and plugin information
 
 =pod
 
@@ -445,12 +434,19 @@ sub getPluginPrefs {
 
 1;
 __END__
-This copyright information applies to the AntiWikiSpamPlugin:
+Plugin for Foswiki - The Free and Open Source Wiki, http://foswiki.org/
 
-# Plugin for Foswiki - The Free and Open Source Wiki, http://foswiki.org/
-#
-# AntiWikiSpamPlugin is # This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-#
-# For licensing info read LICENSE file in the Foswiki root.
+Copyright (C) 2005-2008 Sven Dowideit SvenDowideit@wikiring.com
+Copyright (C) 2009-2011 George Clark
+
+AntiWikiSpamPlugin is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+For licensing info read LICENSE file in the Foswiki root.
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+As per the GPL, removal of this notice is prohibited.
