@@ -57,9 +57,9 @@ our $SHORTDESCRIPTION = 'Lightweight wiki spam prevention';
 our $NO_PREFS_IN_TOPIC = 1;
 
 our $pluginName = 'AntiWikiSpamPlugin';
-my $debug       = 0;
-my $bypassFail  = 0;
-my $sensitivity = undef;
+my $debug        = 0;
+my $bypassFail   = 0;
+my $hitThreshold = undef;
 my $hits;
 
 =begin TML
@@ -101,8 +101,7 @@ sub initPlugin {
     #forceUpdate
     Foswiki::Func::registerRESTHandler( 'forceUpdate', \&forceUpdate );
 
-    $debug =
-      Foswiki::Func::getPreferencesFlag('ANTIWIKISPAMPLUGIN_DEBUG');
+    $debug = Foswiki::Func::getPreferencesFlag('ANTIWIKISPAMPLUGIN_DEBUG');
 
     writeDebug(" AntiWikiSpam is initialized ");
 
@@ -195,7 +194,7 @@ sub beforeAttachmentSaveHandler {
         );
         if (
             !$bypassFail &&    # User is not in trusted group
-            $sensitivity > 0
+            $hitThreshold > 0
           )
         {                      # and Sensitivity not set to simulate
 
@@ -388,10 +387,11 @@ sub checkTextUsingRegex {
                 );
                 if (
                     !$bypassFail &&        # User is not in trusted group
-                    $sensitivity > 0 &&    # and Sensitivity not set to simulate
-                    $hits >= $sensitivity  # and sensitivity matches hits.
+                    $hitThreshold > 0 &&   # and Sensitivity not set to simulate
+                    $hits >= $hitThreshold # and sensitivity matches hits.
                   )
                 {
+
                     # TODO: make this a nicer error, or make its own template
                     throw Foswiki::OopsException(
                         'attention',
@@ -421,7 +421,7 @@ sub getPluginPrefs {
     my $bypassGroup = '';
     if ( Foswiki::Func::isAnAdmin() ) {
         $bypassFail = 1;
-        }
+    }
     else {
         $bypassGroup =
           $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{ANTISPAMBYPASSGROUP};
@@ -430,19 +430,16 @@ sub getPluginPrefs {
         }
     }
 
-    if (
-        defined $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}
-        {ANTISPAMSENSITIVITY} )
-    {
-        $sensitivity =
-          $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{ANTISPAMSENSITIVITY};
+    if ( defined $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{HitThreshold} ) {
+        $hitThreshold =
+          $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{HitThreshold};
     }
     else {
-        $sensitivity = 1;
+        $hitThreshold = 1;
     }
 
     writeDebug(
-"beforeSaveHandler: bypassGroup = $bypassGroup,   bypassFail = $bypassFail sensitivity = $sensitivity"
+"getPluginPrefs: bypassGroup = $bypassGroup,   bypassFail = $bypassFail HitThreshold = $hitThreshold"
     );
 }
 

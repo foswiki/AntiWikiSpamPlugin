@@ -1,0 +1,10 @@
+%META:TOPICINFO{author="ProjectContributor" date="1303753896" format="1.1" version="1"}%
+%META:TOPICPARENT{name="WikiGroups"}%
+
+<div class="foswikiHelp">
+This topic contains the list of users authorized to bypass spam checks.  Admin users are always permitted to save regardless of the spam checks.
+</div>
+
+%META:PREFERENCE{name="GROUP" title="GROUP" type="Set" value=""}%
+%META:PREFERENCE{name="VIEW_TEMPLATE" title="VIEW_TEMPLATE" type="Set" value="GroupView"}%
+%META:PREFERENCE{name="ALLOWTOPICCHANGE" title="ALLOWTOPICCHANGE" type="Set" value="AdminGroup"}%

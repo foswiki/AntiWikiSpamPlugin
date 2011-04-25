@@ -1,4 +1,5 @@
 # Release manifest for AntiWikiSpamPlugin
+data/Main/AntiWikiSpamBypassGroup.txt 0644 Documentation
 data/System/AntiWikiSpamPlugin.txt 0644 Documentation
 data/System/AntiWikiSpamLocalList.txt 0644 Documentation
 data/Sandbox/AntiWikiSpamTestTopic.txt 0644 Documentation
