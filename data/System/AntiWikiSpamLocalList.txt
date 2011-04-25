@@ -1,0 +1,14 @@
+---+!! !AntiWikiSpamLocalList
+
+---++ List of local regular expressions
+The below verbatim block is extracted and used as a list of Regular
+Expressions for the AntiWikiSpamPlugin. Each line can contain a comment
+starting with a #.  Add your local checks to this block.
+
+<verbatim>
+myspamcheck # simple match
+(https?://)?(our|your)spamcheck\.com/? # Match myspamcheck.com or yourspamcheck.com with an optional header/trailer
+</verbatim>
+
+   * Set ALLOWTOPICVIEW = %USERSWEB%.AdminGroup
+   * Set ALLOWTOPICCHANGE = %USERSWEB%.AdminGroup

@@ -40,11 +40,11 @@ our $VERSION = '$Rev: 1340 $';
 # This is a free-form string you can use to "name" your own plugin version.
 # It is *not* used by the build automation tools, but is reported as part
 # of the version number in PLUGINDESCRIPTIONS.
-our $RELEASE = '$Date: 2008-12-15 04:49:56 +1100 (Mon, 15 Dec 2008) $';
+our $RELEASE = '1.1';
 
 # Short description of this plugin
 # One line description, is shown in the %SYSTEMWEB%.TextFormattingRules topic:
-our $SHORTDESCRIPTION = 'lightweight wiki spam prevention';
+our $SHORTDESCRIPTION = 'Lightweight wiki spam prevention';
 
 # You must set $NO_PREFS_IN_TOPIC to 0 if you want your plugin to use
 # preferences set in the plugin topic. This is required for compatibility
@@ -56,10 +56,11 @@ our $SHORTDESCRIPTION = 'lightweight wiki spam prevention';
 # and topic level.
 our $NO_PREFS_IN_TOPIC = 1;
 
-our $pluginName  = 'AntiWikiSpamPlugin';
-our $debug       = 0;
-our $bypassFail  = undef;
-our $sensitivity = undef;
+our $pluginName = 'AntiWikiSpamPlugin';
+my $debug       = 0;
+my $bypassFail  = 0;
+my $sensitivity = undef;
+my $hits;
 
 =begin TML
 
@@ -99,6 +100,9 @@ sub initPlugin {
 
     #forceUpdate
     Foswiki::Func::registerRESTHandler( 'forceUpdate', \&forceUpdate );
+
+    $debug =
+      Foswiki::Func::getPreferencesFlag('ANTIWIKISPAMPLUGIN_DEBUG');
 
     writeDebug(" AntiWikiSpam is initialized ");
 
@@ -145,13 +149,11 @@ sub beforeSaveHandler {
     # do not uncomment, use $_[0], $_[1]... instead
     ### my ( $text, $topic, $web ) = @_;
 
-    my $action = getCgiAction();
-    return unless $action =~ /^save/;
-
     getPluginPrefs();    # Process preference settings for the plugin
 
     writeDebug("beforeSaveHandler( $_[2].$_[1] ) ");
     downloadRegexUpdate();
+    $hits = 0;
     checkText( $_[2], $_[1], $_[0] );
     return;
 }
@@ -209,6 +211,7 @@ sub beforeAttachmentSaveHandler {
     }
 
     downloadRegexUpdate();
+    $hits = 0;
     checkText( $_[2], $_[1], $text );
     return;
 }
@@ -336,9 +339,14 @@ sub checkText {
             writeDebug("Bypass - anti-spam topic");
             return;    #don't check the anti-spam topic
         }
+
+# Note: Read regex topic without checking access permission. The local anti-spam
+# regular expressions may be protected from general access.
         my ( $meta, $regexs ) =
           Foswiki::Func::readTopic( $regexWeb, $regexTopic );
-        checkTextUsingRegex( $web, $topic, $regexs, $_[0] );
+        ($regexs) = $regexs =~ m#<verbatim>(.*)</verbatim>#ms;
+        writeDebug("LOCAL Regexes \n($regexs)\n");
+        checkTextUsingRegex( $web, $topic, $regexs, $_[0] ) if length($regexs);
     }
 
     # use the share spam regexs
@@ -360,7 +368,8 @@ sub checkTextUsingRegex {
     #my ($web, $topic, $regexs, $text) = @_;
     my $web   = shift;
     my $topic = shift;
-    my $hits  = 0;
+
+    writeDebug("Checking - HITS start at $hits");
 
     #load text as a set of regex's, and eval
     foreach my $regexLine ( split( /\n/, $_[0] ) ) {
@@ -373,18 +382,16 @@ sub checkTextUsingRegex {
             #writeDebug ("Checking for $regex ");
             if ( $_[1] =~ /$regex/i ) {
                 my $wikiName = Foswiki::Func::getWikiName();
-                Foswiki::Func::writeWarning(
-"detected spam from user $wikiName at $web.$topic (regex=$regex) bypass=$bypassFail"
-                );
                 $hits++;
+                Foswiki::Func::writeWarning(
+"detected spam from user $wikiName at $web.$topic (regex=$regex) bypass=$bypassFail HIT $hits"
+                );
                 if (
-                    !$bypassFail &&    # User is not in trusted group
-                    $sensitivity > 0
-                    &&                 # and Sensitivity not set to simulate
-                    $hits >= $sensitivity
+                    !$bypassFail &&        # User is not in trusted group
+                    $sensitivity > 0 &&    # and Sensitivity not set to simulate
+                    $hits >= $sensitivity  # and sensitivity matches hits.
                   )
-                {                      # and sensitivity matches hits.
-
+                {
                     # TODO: make this a nicer error, or make its own template
                     throw Foswiki::OopsException(
                         'attention',
@@ -403,31 +410,6 @@ sub checkTextUsingRegex {
 
 =pod 
 
----++ getCgiAction() -> $script
-
-our version of getting the script action
-
-=cut
-
-sub getCgiAction {
-    my $pathInfo  = $ENV{'PATH_INFO'}   || '';
-    my $theAction = $ENV{'REQUEST_URI'} || '';
-    if ( $theAction =~ /^.*?\/([^\/]+)$pathInfo.*$/ ) {
-        $theAction = $1;
-    }
-    else {
-        $theAction = 'view';
-    }
-
-    #writeDebug("PATH_INFO=$ENV{'PATH_INFO'}");
-    #writeDebug("REQUEST_URI=$ENV{'REQUEST_URI'}");
-    #writeDebug("theAction=$theAction");
-
-    return $theAction;
-}
-
-=pod 
-
 ---++ getPluginPrefs() -> 
 
 Retrieve preference settings for the AntiWikiSpam  plugin.
@@ -435,9 +417,19 @@ Retrieve preference settings for the AntiWikiSpam  plugin.
 =cut
 
 sub getPluginPrefs {
-    my $bypassGroup =
-      $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{ANTISPAMBYPASSGROUP};
-    $bypassFail = $bypassGroup && Foswiki::Func::isGroupMember("$bypassGroup");
+
+    my $bypassGroup = '';
+    if ( Foswiki::Func::isAnAdmin() ) {
+        $bypassFail = 1;
+        }
+    else {
+        $bypassGroup =
+          $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{ANTISPAMBYPASSGROUP};
+        if ($bypassGroup) {
+            $bypassFail = Foswiki::Func::isGroupMember("$bypassGroup");
+        }
+    }
+
     if (
         defined $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}
         {ANTISPAMSENSITIVITY} )
@@ -448,6 +440,7 @@ sub getPluginPrefs {
     else {
         $sensitivity = 1;
     }
+
     writeDebug(
 "beforeSaveHandler: bypassGroup = $bypassGroup,   bypassFail = $bypassFail sensitivity = $sensitivity"
     );

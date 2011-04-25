@@ -1,0 +1,19 @@
+---+ Test topic for %SYSTEMWEB%.AntiWikiSpamPlugin
+
+Edit and save this topic as Admin. No save failure will occur, the tests and failures will be logged. Check your debug.log for details.  (Note that users in the AdminGroup as
+well as the bypass group will bypass spam checking and will not trigger the save error). This topic is restricted to the Admin group as it might trigger other external spam alerts if scanned.
+
+Edit and save this topic to trigger the check
+   * Set ANTIWIKISPAMPLUGIN_DEBUG = 0
+   * Set ALLOWTOPICCHANGE = %USERSWEB%.AdminGroup
+   * Set ALLOWTOPICVIEW = %USERSWEB%.AdminGroup
+
+The next 2 lines will match the sample local rules shipped with the plugin.  The 3rd line will match against the public rules 5 times (as of 25 April 2011) resulting in a total of 7 spam "hits".
+
+https://ourspamcheck.com/
+
+myspamcheck
+
+viagrabuy
+
+-- %USERSWEB%.ProjectContributor - 15 Apr 2011
