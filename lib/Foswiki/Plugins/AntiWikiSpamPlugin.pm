@@ -413,6 +413,7 @@ Retrieve preference settings for the AntiWikiSpam  plugin.
 
 sub getPluginPrefs {
 
+    $bypassFail = 0;
     my $bypassGroup = '';
     if ( Foswiki::Func::isAnAdmin() ) {
         $bypassFail = 1;

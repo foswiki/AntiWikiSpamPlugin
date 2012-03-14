@@ -7,7 +7,7 @@ $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{ANTISPAMREGEXLISTURL} = 'http://arch.
 
 # **STRING 40**
 # Local topic name containing list of regular expressions that match spam postings.
-$Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{LOCALANTISPAMREGEXLISTTOPIC} = '%SYSTEMWEB%.LocalAntiWikiSpamPluginList';
+$Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{LOCALANTISPAMREGEXLISTTOPIC} = '$Foswiki::cfg{SystemWebName}.AntiWikiSpamLocalList';
 
 # **NUMBER**
 # Age in minutes of the regular expression list, after which a new list will be retrieved.

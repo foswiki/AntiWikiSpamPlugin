@@ -50,6 +50,12 @@ the spam filter:
 | ={Plugins}{AntiWikiSpamPlugin}{BypassGroup}= | A Wiki group listing members who are permitted to save without any Spam checking. Note that members of the %USERSWEB%.AdminGroup are always permitted to save. | AntiWikiSpamBypassGroup |
 | ={Plugins}{AntiWikiSpamPlugin}{HitThreshold}= | Number of regex hits required to block the save. Set to -1 to simulate operation.  | 1 |
 
+There is also a DEBUG setting available.  Set it in Main.SitePreferences
+
+<verbatim>
+   * Set ANTIWIKISPAMPLUGIN_DEBUG = 1
+</verbatim>
+
 ---++ Installation Instructions
 
 %$INSTALL_INSTRUCTIONS%
