@@ -23,4 +23,12 @@ $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{BypassGroup} = 'AntiWikiSpamBypassGro
 # If un-set, then the default is 1.
 $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{HitThreshold} = 1;
 
+# **STRING 40**
+# Name of a topic containing a white-list that limit registrations.
+$Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{RegistrationWhiteList} = '$Foswiki::cfg{SystemWebName}.AntiWikiSpamRegistrationWhiteList';
+
+# **STRING 40**
+# Name of a topic containing a black-list that limit registrations.
+$Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{RegistrationBlackList} = '$Foswiki::cfg{SystemWebName}.AntiWikiSpamRegistrationBlackList';
+
 1;
