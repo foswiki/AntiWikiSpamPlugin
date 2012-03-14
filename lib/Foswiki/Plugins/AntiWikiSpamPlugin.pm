@@ -495,7 +495,7 @@ sub registrationHandler {
 
     require Foswiki::OopsException;
     $Foswiki::Plugins::SESSION->logger->log( 'warning',
-'Registration of $data->{WikiName} rejected by AntiWikiSpamPlugin: white: $white black: $black'
+"Registration of $data->{WikiName} rejected by AntiWikiSpamPlugin: white: $white black: $black"
     );
     throw Foswiki::OopsException(
         'attention',
