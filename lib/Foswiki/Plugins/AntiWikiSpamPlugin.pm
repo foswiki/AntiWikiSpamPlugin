@@ -19,9 +19,9 @@ use strict;
 require Foswiki::Func;       # The plugins API
 require Foswiki::Plugins;    # For the API version
 
-our $VERSION = '$Rev$';
-our $RELEASE = '1.3';
-our $SHORTDESCRIPTION = 'Lightweight wiki spam prevention';
+our $VERSION           = '$Rev$';
+our $RELEASE           = '1.3';
+our $SHORTDESCRIPTION  = 'Lightweight wiki spam prevention';
 our $NO_PREFS_IN_TOPIC = 1;
 
 our $pluginName = 'AntiWikiSpamPlugin';
@@ -29,6 +29,7 @@ my $debug        = 0;
 my $bypassFail   = 0;
 my $hitThreshold = undef;
 my $hits;
+
 # Caches of registration white- and black- lists
 our $regoWhite;
 our $regoBlack;
@@ -153,12 +154,12 @@ sub beforeAttachmentSaveHandler {
     if ( $text =~ /<script.*?eval *\(.*?<\/script>/gis )
     {    #TODO: there's got to be a better way to do this.
         Foswiki::Func::writeWarning(
-	    "detected possible javascript exploit by $wikiName at attachment in in $_[2].$_[1]  bypass = $bypassFail"
-	    );
+"detected possible javascript exploit by $wikiName at attachment in in $_[2].$_[1]  bypass = $bypassFail"
+        );
         if (
             !$bypassFail &&    # User is not in trusted group
             $hitThreshold > 0
-	    )
+          )
         {                      # and Sensitivity not set to simulate
 
             throw Foswiki::OopsException(
@@ -167,8 +168,8 @@ sub beforeAttachmentSaveHandler {
                 web   => $_[2],
                 topic => $_[1],
                 params =>
-		'The attachment has been rejected as it contains a possible javascript eval exploit.'
-		);
+'The attachment has been rejected as it contains a possible javascript eval exploit.'
+            );
         }
     }
 
@@ -235,29 +236,29 @@ sub downloadRegexUpdate {
         my $topicExists = fileExists( ${pluginName} . '_regexs' );
         if ($topicExists) {
             my $getListTimeOut =
-		$Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{GETLISTTIMEOUT}
-	    || 61;
+              $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{GETLISTTIMEOUT}
+              || 61;
 
             #has it been more than $getListTimeOut minutes since the last get?
             my $lastTimeWeCheckedForUpdate =
-		readWorkFile( ${pluginName} . '_timeOfLastCheck' );
+              readWorkFile( ${pluginName} . '_timeOfLastCheck' );
             writeDebug(
                 "time > ($lastTimeWeCheckedForUpdate + ($getListTimeOut * 60))"
-		);
+            );
             $timesUp =
-		time > ( $lastTimeWeCheckedForUpdate + ( $getListTimeOut * 60 ) );
+              time > ( $lastTimeWeCheckedForUpdate + ( $getListTimeOut * 60 ) );
         }
         return unless ( $timesUp || !$topicExists );
     }
 
     my $lock =
-	readWorkFile( ${pluginName} . '_lock' )
-	;    # SMELL: that's no good way to do locking
+      readWorkFile( ${pluginName} . '_lock' )
+      ;    # SMELL: that's no good way to do locking
     if ( $lock eq '' ) {
         writeDebug("beginning download of new spam data");
         saveWorkFile( ${pluginName} . '_lock', 'lock' );
         my $listUrl =
-	    $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{ANTISPAMREGEXLISTURL};
+          $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{ANTISPAMREGEXLISTURL};
         my $list = Foswiki::Func::getExternalResource($listUrl)->content();
         if ( defined($list) ) {
 
@@ -290,14 +291,17 @@ sub checkText {
     writeDebug("checkText($web.$topic, ... )");
 
     # do localspamlist first
-    my $regexs = _loadRegexList( $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{LOCALANTISPAMREGEXLISTTOPIC}, "$web.$topic" );
+    my $regexs = _loadRegexList(
+        $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{LOCALANTISPAMREGEXLISTTOPIC},
+        "$web.$topic"
+    );
     if ($regexs) {
-	writeDebug("LOCAL Regexes \n($regexs)\n");
-	checkTextUsingRegex( $web, $topic, $regexs, $_[0] ) if length($regexs);
+        writeDebug("LOCAL Regexes \n($regexs)\n");
+        checkTextUsingRegex( $web, $topic, $regexs, $_[0] ) if length($regexs);
     }
 
     # use the share spam regexs
-    $regexs = _makeRegexList(readWorkFile( ${pluginName} . '_regexs' ));
+    $regexs = _makeRegexList( readWorkFile( ${pluginName} . '_regexs' ) );
     checkTextUsingRegex( $web, $topic, $regexs, $_[0] );
     return;
 }
@@ -313,38 +317,39 @@ check a text for spam using a given regex; throws an oops exception if it detect
 sub checkTextUsingRegex {
 
     #my ($web, $topic, $regexs, $text) = @_;
-    my $web   = shift;
-    my $topic = shift;
+    my $web    = shift;
+    my $topic  = shift;
     my $regexs = shift;
 
     writeDebug("Checking - HITS start at $hits");
 
-    foreach my $regex ( @$regexs ) {
-	#writeDebug ("Checking for $regex ");
-	if ( $_[0] =~ /$regex/i ) {
-	    my $wikiName = Foswiki::Func::getWikiName();
-	    $hits++;
-	    Foswiki::Func::writeWarning(
-		"detected spam from user $wikiName at $web.$topic (regex=$regex) bypass=$bypassFail HIT $hits"
-                );
-	    if (
-		!$bypassFail &&        # User is not in trusted group
-		$hitThreshold > 0 &&   # and Sensitivity not set to simulate
-		$hits >= $hitThreshold # and sensitivity matches hits.
-		)
-	    {
+    foreach my $regex (@$regexs) {
 
-		# TODO: make this a nicer error, or make its own template
-		throw Foswiki::OopsException(
-		    'attention',
-		    def   => 'save_error',
-		    web   => $web,
-		    topic => $topic,
-		    params =>
-		    "The text of topic $web.$topic has been rejected as it may contain spam."
-                    );
-	    }
-	}
+        #writeDebug ("Checking for $regex ");
+        if ( $_[0] =~ /$regex/i ) {
+            my $wikiName = Foswiki::Func::getWikiName();
+            $hits++;
+            Foswiki::Func::writeWarning(
+"detected spam from user $wikiName at $web.$topic (regex=$regex) bypass=$bypassFail HIT $hits"
+            );
+            if (
+                !$bypassFail &&           # User is not in trusted group
+                $hitThreshold > 0 &&      # and Sensitivity not set to simulate
+                $hits >= $hitThreshold    # and sensitivity matches hits.
+              )
+            {
+
+                # TODO: make this a nicer error, or make its own template
+                throw Foswiki::OopsException(
+                    'attention',
+                    def   => 'save_error',
+                    web   => $web,
+                    topic => $topic,
+                    params =>
+"The text of topic $web.$topic has been rejected as it may contain spam."
+                );
+            }
+        }
     }
     return;
 }
@@ -386,15 +391,16 @@ sub getPluginPrefs {
 }
 
 sub _loadRegexList {
-    my ($regexTopic, $exclude) = @_;
+    my ( $regexTopic, $exclude ) = @_;
 
     my $systemWeb = $Foswiki::cfg{SystemWebName};
     ( my $regexWeb, $regexTopic ) =
-	Foswiki::Func::normalizeWebTopicName( $systemWeb, $regexTopic );
+      Foswiki::Func::normalizeWebTopicName( $systemWeb, $regexTopic );
     return undef if $exclude && "$regexWeb.$regexTopic" eq $exclude;
     return undef unless Foswiki::Func::topicExists( $regexWeb, $regexTopic );
-    # Note: Read regex topic without checking access permission. The local anti-spam
-    # regular expressions may be protected from general access.
+
+# Note: Read regex topic without checking access permission. The local anti-spam
+# regular expressions may be protected from general access.
     my ( $meta, $regexs ) = Foswiki::Func::readTopic( $regexWeb, $regexTopic );
     $regexs =~ m#<verbatim>(.*)</verbatim>#ms;
     return _makeRegexList($1);
@@ -409,48 +415,52 @@ sub _makeRegexList {
         my $regex = $1;
         $regex =~ s/^\s+//;
         $regex =~ s/\s+$//;
-	next unless $regex;
-	push(@regexes, $regex);
+        next unless $regex;
+        push( @regexes, $regex );
     }
     return \@regexes;
 }
 
 # Check a registration to see if the email address used is blacklisted
 sub registrationHandler {
-    my ($web, $wikiName, $loginName, $data ) = @_;
-    # $data contains at least: WikiName FirstName LastName Email
-    # May also contain: Photo Password Confirm AddToGroups
-    # Anything else is not used by Registration
-    # To spoil the party for a spam registration, check the email address against a
-    # blacklist.
+    my ( $web, $wikiName, $loginName, $data ) = @_;
+
+ # $data contains at least: WikiName FirstName LastName Email
+ # May also contain: Photo Password Confirm AddToGroups
+ # Anything else is not used by Registration
+ # To spoil the party for a spam registration, check the email address against a
+ # blacklist.
     require Socket;
 
-    my ($user, $domain) = split(/@/, $data->{Email}, 2);
+    my ( $user, $domain ) = split( /@/, $data->{Email}, 2 );
     $domain ||= '';
     my $packed_ip = gethostbyname($domain);
     my $ipad = $packed_ip ? Socket::inet_ntoa($packed_ip) : undef;
 
     unless ($regoWhite) {
-	$regoWhite = _loadRegexList( $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{RegistrationWhiteList} );
+        $regoWhite = _loadRegexList(
+            $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{RegistrationWhiteList} );
     }
-    my $white = scalar(@$regoWhite); # if there is at least one white expr
+    my $white = scalar(@$regoWhite);    # if there is at least one white expr
     foreach my $rego (@$regoWhite) {
-	if ($domain =~ /$rego/i || $ipad && $ipad =~ /$rego/) {
-	    $white = 1;
-	    last;
-	}
+        if ( $domain =~ /$rego/i || $ipad && $ipad =~ /$rego/ ) {
+            $white = 1;
+            last;
+        }
     }
     my $black = 0;
     if ($white) {
-	unless ($regoBlack) {
-	    $regoBlack = _loadRegexList( $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{RegistrationBlackList} );
-	}
-	foreach my $rego (@$regoBlack) {
-	    if ($domain =~ /$rego/i || $ipad && $ipad =~ /$rego/) {
-		$black = 1;
-		last;
-	    }
-	}
+        unless ($regoBlack) {
+            $regoBlack =
+              _loadRegexList( $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}
+                  {RegistrationBlackList} );
+        }
+        foreach my $rego (@$regoBlack) {
+            if ( $domain =~ /$rego/i || $ipad && $ipad =~ /$rego/ ) {
+                $black = 1;
+                last;
+            }
+        }
     }
     return if $white && !$black;
 
@@ -459,29 +469,41 @@ sub registrationHandler {
     # the rego process before the user is created
     my $cUID = Foswiki::Func::getCanonicalUserID( $data->{LoginName} );
     $Foswiki::Plugins::SESSION->{users}->removeUser($cUID);
-    if (Foswiki::Func::topicExists($Foswiki::cfg{UsersWebName}, $data->{WikiName})) {
-	# Spoof the user so we can delete their topic
-	my $safe = $Foswiki::Plugins::SESSION->{user};
-	$Foswiki::Plugins::SESSION->{user} = $cUID;
-	try {
-	    Foswiki::Func::moveTopic( $Foswiki::cfg{UsersWebName}, $data->{WikiName},
-				      $Foswiki::cfg{TrashWebName}, "SuspectSpammer$data->{WikiName}".time);
-	} finally {
-	    $Foswiki::Plugins::SESSION->{user} = $safe;
-	};
+    if (
+        Foswiki::Func::topicExists(
+            $Foswiki::cfg{UsersWebName},
+            $data->{WikiName}
+        )
+      )
+    {
+
+        # Spoof the user so we can delete their topic
+        my $safe = $Foswiki::Plugins::SESSION->{user};
+        $Foswiki::Plugins::SESSION->{user} = $cUID;
+        try {
+            Foswiki::Func::moveTopic(
+                $Foswiki::cfg{UsersWebName},
+                $data->{WikiName},
+                $Foswiki::cfg{TrashWebName},
+                "SuspectSpammer$data->{WikiName}" . time
+            );
+        }
+        finally {
+            $Foswiki::Plugins::SESSION->{user} = $safe;
+        };
     }
 
     require Foswiki::OopsException;
-    $Foswiki::Plugins::SESSION->logger->log(
-	'warning',
-	'Registration of $data->{WikiName} rejected by AntiWikiSpamPlugin: white: $white black: $black' );
+    $Foswiki::Plugins::SESSION->logger->log( 'warning',
+'Registration of $data->{WikiName} rejected by AntiWikiSpamPlugin: white: $white black: $black'
+    );
     throw Foswiki::OopsException(
-	'attention',
-	web    => $data->{webName},
-	topic  => $data->{WikiName},
-	def    => 'problem_adding',
-	params => [ "'$data->{WikiName}' spam filter was triggered" ]
-        );
+        'attention',
+        web    => $data->{webName},
+        topic  => $data->{WikiName},
+        def    => 'problem_adding',
+        params => ["'$data->{WikiName}' spam filter was triggered"]
+    );
 }
 
 1;
