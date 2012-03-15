@@ -10,8 +10,7 @@ be found in the whitelist before the blacklist is checked. Don't forget to
 escape full-stops in regular expressions!
 
 <verbatim>
-safetymail\.info$
-tradermail\.info$
+^76\.74\.239\.26$ # mailinator.com
 </verbatim>
 
    * Set ALLOWTOPICVIEW = %USERSWEB%.AdminGroup
