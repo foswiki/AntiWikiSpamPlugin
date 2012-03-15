@@ -73,6 +73,13 @@ sub initPlugin {
     #forceUpdate
     Foswiki::Func::registerRESTHandler( 'forceUpdate', \&forceUpdate );
 
+    Foswiki::Func::registerRESTHandler(
+        'removeUser', \&removeUser,
+        authenticate => 1,
+        validate     => 1,
+        http_allow   => 'POST'
+    );
+
     $debug = Foswiki::Func::getPreferencesFlag('ANTIWIKISPAMPLUGIN_DEBUG');
 
     writeDebug(" AntiWikiSpam is initialized ");
@@ -506,12 +513,75 @@ sub registrationHandler {
     );
 }
 
+=pod
+
+---++ removeUser($session) -> $text
+
+If a SPAM registration makes it through, this REST handler will remove a user.
+   * Passed with param: spamuser
+   * Calls the removeUser function to remove the registration
+   * Moves the user topic to SuspectSpammer
+
+%SCRIPTURL%/rest/AntiWikiSpamPlugin/removeUser?spamuser=UserWikiName
+
+=cut
+
+sub removeUser {
+    my $session    = shift;
+    my $response   = $session->{response};
+    my $query      = Foswiki::Func::getCgiQuery();
+    my $message    = '';
+    my $logMessage = '';
+    my $user       = Foswiki::Func::getWikiUserName();
+
+    return "${pluginName} only available to Administrators"
+      unless ( Foswiki::Func::isAnAdmin() );
+
+    return "${pluginName} . ERROR: spamuser parameter required\n"
+      unless ( $query->param('spamuser') );
+
+    my ( $web, $spamUser ) =
+      Foswiki::Func::normalizeWebTopicName( $Foswiki::cfg{UsersWeb},
+        $query->param('spamuser') );
+
+    my $cUID = Foswiki::Func::getCanonicalUserID($spamUser);
+
+    if ( $cUID && $Foswiki::Plugins::SESSION->{users}->userExists($cUID) ) {
+        $Foswiki::Plugins::SESSION->{users}->removeUser($cUID);
+        $message    .= " - user removed from Mapping Manager <br/>";
+        $logMessage .= "Mapping removed, ";
+    }
+    else {
+        $message    .= " - User not known to the Mapping Manager <br/>";
+        $logMessage .= "unknown to Mapping, ";
+    }
+
+    if ( Foswiki::Func::topicExists( $web, $spamUser ) ) {
+        my $newTopic = "SuspectSpammer$spamUser" . time;
+        Foswiki::Func::moveTopic( $web, $spamUser, $Foswiki::cfg{TrashWebName},
+            $newTopic );
+        $message .=
+          " - user topic moved to $Foswiki::cfg{TrashWebName}.$newTopic <br/>";
+        $logMessage .=
+          "User topic moved to $Foswiki::cfg{TrashWebName}.$newTopic, ";
+    }
+    else {
+        $message    .= " - user topic not found <br/>";
+        $logMessage .= " User topic not found, ";
+    }
+
+    Foswiki::Func::writeWarning("$user: $spamUser $logMessage");
+
+    return ${pluginName} . "<br />" . $message
+      . "<br/> $web.$spamUser processed\n";
+}
+
 1;
 __END__
 Plugin for Foswiki - The Free and Open Source Wiki, http://foswiki.org/
 
 Copyright (C) 2005-2009 Sven Dowideit SvenDowideit@wikiring.com
-Copyright (C) 2009-2011 George Clark
+Copyright (C) 2009-2012 George Clark
 Copyright (C) 2012 Crawford Currie http://c-dot.co.uk
 
 AntiWikiSpamPlugin is distributed in the hope that it will be useful,

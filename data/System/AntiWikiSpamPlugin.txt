@@ -37,6 +37,21 @@ cd [foswiki-bin-directory]
 </verbatim>
    * Set the =GETLISTTIMEOUT= to a very large number so that the cron job will be the only source of updates
 
+---++ Removing Spam accounts
+
+Normally user accounts should not be removed.  They represent the history of
+topic changes.  In addition if the WikiName is reused, the new user "assumes"
+the history of the prior user.   However, when dealing with spam
+registrations, it's generally recommended to remove the accounts. Foswiki does not provide an easy way to remove
+registrations, so this plugin adds a REST handler that can remove user
+accounts from the wiki.  *This function is only available to Administrators*
+
+<!-- %JQREQUIRE{"ui, ui::autocomplete"}% -->
+<form name="admin" action="%SCRIPTURLPATH{rest}%/AntiWikiSpamPlugin/removeUser" method="post">
+%INCLUDE{"System.JQueryAjaxHelper" section="userselector" INPUT_NAME="spamuser" MULTI="false"}%
+<input type="submit" class="foswikiSubmit" value="Remove User" /> 
+</form>
+
 ---++ Configuration
 
 The configuration of this plugin is done using the %SCRIPTURL{"configure"}%
