@@ -33,65 +33,65 @@ sub set_up {
 }
 
 sub tear_down {
+    my $this = shift;
+    $this->SUPER::tear_down();
     undef $Foswiki::Plugins::AntiWikiSpamPlugin::regoWhite;
     undef $Foswiki::Plugins::AntiWikiSpamPlugin::regoBlack;
 }
 
-=pod
-
 # Test removeUser REST handler
 sub test_RESTremoveUser {
     my $this = shift;
-    my $query = Unit::Request->new(
-        {
-            'user' =>  $this->{test_user_wikiname},
-        });
+    my $query =
+      Unit::Request->new( { 'user' => $this->{test_user_wikiname}, } );
     $query->method('POST');
     $query->path_info("/AntiWikiSpamPlugin/removeUser");
     $this->createNewFoswikiSession( 'AdminUser', $query );
 
     my ( $out, $result ) = $this->captureWithKey(
         rest => $REST_UI_FN,
-	$this->{session}
-	);
-    $this->assert_matches(qr/$this->{test_user_wikiname} removed/, $out);
+        $this->{session}
+    );
+    $this->assert_matches( qr/$this->{test_user_wikiname} removed/, $out );
 
     # Scumbag should be gone from the passwords DB
     # OK to use filenames; FoswikiFnTestCase forces password manager to
     # HtPasswdUser
-    $this->assert_null(`grep $this->{test_user_login} $Foswiki::cfg{Htpasswd}{FileName}`);
-    $this->assert_null(`grep $this->{test_user_wikiname} $Foswiki::cfg{Htpasswd}{FileName}`);
+    $this->assert_null(
+        `grep $this->{test_user_login} $Foswiki::cfg{Htpasswd}{FileName}`);
+    $this->assert_null(
+        `grep $this->{test_user_wikiname} $Foswiki::cfg{Htpasswd}{FileName}`);
 
-    my ($crap, $wu) = Foswiki::Func::readTopic(
-	$Foswiki::cfg{UsersWebName}, $Foswiki::cfg{UsersTopicName});
-    $this->assert($wu !~ /$this->{test_user_wikiname}/s);
-    $this->assert($wu !~ /$this->{test_user_login}/s);
+    my ( $crap, $wu ) = Foswiki::Func::readTopic( $Foswiki::cfg{UsersWebName},
+        $Foswiki::cfg{UsersTopicName} );
+    $this->assert( $wu !~ /$this->{test_user_wikiname}/s );
+    $this->assert( $wu !~ /$this->{test_user_login}/s );
 
     $this->assert(
-	!Foswiki::Func::topicExists(
-	     $Foswiki::cfg{UsersWebName}, $this->{test_user_wikiname}));
+        !Foswiki::Func::topicExists(
+            $Foswiki::cfg{UsersWebName},
+            $this->{test_user_wikiname}
+        )
+    );
 }
 
 # Deny a non-admin access to removeUser
 sub test_denySelfImmolation {
     my $this = shift;
-    my $query = Unit::Request->new(
-        {
-            'user' =>  $this->{test_user_wikiname},
-        });
+    my $query =
+      Unit::Request->new( { 'user' => $this->{test_user_wikiname}, } );
     $query->method('POST');
     $query->path_info("/AntiWikiSpamPlugin/removeUser");
     $this->createNewFoswikiSession( $this->{test_user_login}, $query );
 
     my ( $out, $result ) = $this->captureWithKey(
         rest => $REST_UI_FN,
-	$this->{session}
-	);
-    $this->assert_matches(qr/Status: 500/, $out);
-    $this->assert_matches(qr/removeUser only available to Administrators/, $out);
+        $this->{session}
+    );
+    $this->assert_matches( qr/Status: 500/, $out );
+    $this->assert_matches( qr/removeUser only available to Administrators/,
+        $out );
 }
-
-=cut
 
 sub test_spamRegistration {
     my $this = shift;

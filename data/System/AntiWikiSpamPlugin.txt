@@ -67,12 +67,6 @@ the spam filter:
 | ={Plugins}{AntiWikiSpamPlugin}{BypassGroup}= | A Wiki group listing members who are permitted to save without any Spam checking. Note that members of the %USERSWEB%.AdminGroup are always permitted to save. | AntiWikiSpamBypassGroup |
 | ={Plugins}{AntiWikiSpamPlugin}{HitThreshold}= | Number of regex hits required to block the save. Set to -1 to simulate operation.  | 1 |
 
-There is also a DEBUG setting available.  Set it in Main.SitePreferences
-
-<verbatim>
-   * Set ANTIWIKISPAMPLUGIN_DEBUG = 1
-</verbatim>
-
 ---++ Registration
 Registration is controlled by limiting the email domains that can be used by people registering to the wiki. For example, you can set up a whitelist so that only people with a corporate email address can register, or set up a blacklist to filter known email hosts that spammers use.
 
