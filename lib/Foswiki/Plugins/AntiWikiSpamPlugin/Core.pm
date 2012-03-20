@@ -445,7 +445,14 @@ sub _removeUser {
     }
 
     # Remove the user topic
-    my $wikiname = Foswiki::Func::getWikiUserName($cUID);
+    my $wikiname;
+    if ($cUID) {
+        $wikiname = Foswiki::Func::getWikiUserName($cUID);
+    }
+    else {
+        $wikiname =
+          $user;    #  User didn't exist in mapper,  so try to remove user topic
+    }
     ( my $web, $wikiname ) =
       Foswiki::Func::normalizeWebTopicName( $Foswiki::cfg{UsersWebName},
         $wikiname );
