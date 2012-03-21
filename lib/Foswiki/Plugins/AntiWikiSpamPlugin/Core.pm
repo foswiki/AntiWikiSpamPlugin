@@ -433,6 +433,12 @@ sub _removeUser {
     my $cUID = Foswiki::Func::getCanonicalUserID($user);
     my ( $message, $logMessage ) = ( '', '' );
 
+    if ( $cUID =~ m/^BaseUserMapping_/ ) {
+        $message    = "Cannot remove $user: $cUID <br />";
+        $logMessage = "Cannot remove $user: $cUID";
+        return ( $message, $logMessage );
+    }
+
     # Remove the user from the mapping manager
     if ( $cUID && $Foswiki::Plugins::SESSION->{users}->userExists($cUID) ) {
         $Foswiki::Plugins::SESSION->{users}->removeUser($cUID);
