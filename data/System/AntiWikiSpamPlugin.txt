@@ -39,12 +39,12 @@ cd [foswiki-bin-directory]
 
 ---++ Removing User Accounts
 
-Normally user accounts should not be removed, as they represent the history of
-topic changes.  In addition if the WikiName is reused, the new user "assumes"
-the history of the prior user.   However, when dealing with spam
-registrations, it's generally recommended to remove the accounts. This plugin
-provides a REST handler that can remove user accounts from the wiki, which
-you can access through the following form.
+Normally user accounts should not be removed, as they represent the history of topic changes.  In addition if the WikiName is reused, the new user "assumes"
+the history of the prior user.   However, when dealing with spam registrations, it's generally recommended to remove the accounts. This plugin
+provides a REST handler that can remove user accounts from the wiki, which you can access through the following form.
+   * The User will be removed from the Mapping manager if supported
+   * The User will be removed from any groups
+   * The User topic and any attachments are moved to the %TRASHWEB% Web as =SuspectSpammer&lt;WikiName&gt;&lt;timestamp&gt;=
 *This function is only available to Administrators*
 
 <!-- %JQREQUIRE{"ui, ui::autocomplete"}% -->
@@ -87,11 +87,12 @@ To cause a true failure, remove the VIEW and CHANGE restrictions to the topic an
 
 
 |  Author(s): | Foswiki:Main.SvenDowideit - http://fosiki.com |
-|  Copyright: | &copy; 2005-2009 SvenDowideit@fosiki.com %BR% &copy; 2009-2011 George Clark %BR% &copy; 2012 Crawford Currie http://c-dot.co.uk |
+|  Copyright: | &copy; 2005-2009 SvenDowideit@fosiki.com %BR% &copy; 2009-2012 George Clark %BR% &copy; 2012 Crawford Currie http://c-dot.co.uk |
 |  License: | [[http://www.gnu.org/licenses/gpl3.html][GPL 3 (Gnu General Public License)]] |
 |  Version: | %$VERSION% |
 |  Release: | %$RELEASE% |
 |  Change History: | <!-- versions below in reverse order -->&nbsp; |
+|  1.3.2 (TBD) | Foswikitask:Item11679: When removing a user, remove it from any groups. |
 |  1.3.1 (19 Mar 2012) | Remove dialog would remove current user if entered user was not konwn to the Mapper. |
 |  1.3 (14 Mar 2012) | Foswikitask:Item11544: add white/black lists for common spam sources (Foswiki:Main.CrawfordCurrie) <br />Foswikitask:Item11646:  add remove dialog <br />Foswikitask:Item11593: Uninitialized variable |
 |  1.2 (25 Apr 2011) | Foswikitask:Item1091 - add whitelist, <br />Foswikitask:Item1580 - also process comments, <br />Foswikitask:Item10680 - Improve local regex capability |

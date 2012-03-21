@@ -220,7 +220,7 @@ sub _RESTremoveUser {
 
     Foswiki::Func::writeWarning("$user: $lm");
 
-    return ${pluginName} . "<br />" . $m . "<br/> $user removed\n";
+    return ${pluginName} . "<br />" . $m . "<br/> $user processed\n";
 }
 
 #### Support functions
@@ -444,15 +444,33 @@ sub _removeUser {
         $logMessage .= "unknown to Mapping, ";
     }
 
-    # Remove the user topic
-    my $wikiname;
-    if ($cUID) {
-        $wikiname = Foswiki::Func::getWikiUserName($cUID);
+    # Resolve the user to a Wikiname.  Default to input param if no mapping
+    my $wikiname = ($cUID) ? Foswiki::Func::getWikiName($cUID) : $user;
+
+    # If a group topic has been entered, don't remove it.
+    if ( Foswiki::Func::isGroup($wikiname) ) {
+        $message    .= " Cannot remove group $wikiname <br />";
+        $logMessage .= "Cannot remove group $wikiname, ";
+        return ( $message, $logMessage );
     }
-    else {
-        $wikiname =
-          $user;    #  User didn't exist in mapper,  so try to remove user topic
+
+    # Remove the user from any groups.
+    my $it = Foswiki::Func::eachGroup();
+    $logMessage .= "Removed from groups: ";
+    while ( $it->hasNext() ) {
+        my $group = $it->next();
+
+        #$message .= "Checking $group for ($wikiname)<br />";
+        if (
+            Foswiki::Func::isGroupMember( $group, $wikiname, { expand => 0 } ) )
+        {
+            $message    .= "removing $wikiname from $group <br />";
+            $logMessage .= "$group, ";
+            Foswiki::Func::removeUserFromGroup( $wikiname, $group );
+        }
     }
+
+    # Remove the users topic, moving it to trash web
     ( my $web, $wikiname ) =
       Foswiki::Func::normalizeWebTopicName( $Foswiki::cfg{UsersWebName},
         $wikiname );
