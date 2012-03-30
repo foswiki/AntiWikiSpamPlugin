@@ -430,10 +430,15 @@ sub _makeRegexList {
 sub _removeUser {
     my $user = shift;
 
+    # Obtain all the user info before removing things.   If there is no mapping
+    # for the user, then assume the entered username will be removed.
     my $cUID = Foswiki::Func::getCanonicalUserID($user);
-    my ( $message, $logMessage ) = ( '', '' );
+    my $wikiname = ($cUID) ? Foswiki::Func::getWikiName($cUID) : $user;
+    my $email = join( ',', Foswiki::Func::wikinameToEmails($wikiname));
 
-    if ( $cUID =~ m/^BaseUserMapping_/ ) {
+    my ( $message, $logMessage ) = ( "Processing $wikiname($email)<br/>", "($email) " );
+
+    if ( $cUID && $cUID =~ m/^BaseUserMapping_/ ) {
         $message    = "Cannot remove $user: $cUID <br />";
         $logMessage = "Cannot remove $user: $cUID";
         return ( $message, $logMessage );
@@ -449,9 +454,6 @@ sub _removeUser {
         $message    .= " - User not known to the Mapping Manager <br/>";
         $logMessage .= "unknown to Mapping, ";
     }
-
-    # Resolve the user to a Wikiname.  Default to input param if no mapping
-    my $wikiname = ($cUID) ? Foswiki::Func::getWikiName($cUID) : $user;
 
     # If a group topic has been entered, don't remove it.
     if ( Foswiki::Func::isGroup($wikiname) ) {
