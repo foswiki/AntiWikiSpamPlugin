@@ -432,12 +432,11 @@ sub _removeUser {
 
     # Obtain all the user info before removing things.   If there is no mapping
     # for the user, then assume the entered username will be removed.
-    my $cUID     = Foswiki::Func::getCanonicalUserID($user);
+    my $cUID = Foswiki::Func::getCanonicalUserID($user);
     my $wikiname = ($cUID) ? Foswiki::Func::getWikiName($cUID) : $user;
-    my $email    = join( ',', Foswiki::Func::wikinameToEmails($wikiname) );
+    my $email = join( ',', Foswiki::Func::wikinameToEmails($wikiname));
 
-    my ( $message, $logMessage ) =
-      ( "Processing $wikiname($email)<br/>", "($email) " );
+    my ( $message, $logMessage ) = ( "Processing $wikiname($email)<br/>", "($email) " );
 
     if ( $cUID && $cUID =~ m/^BaseUserMapping_/ ) {
         $message    = "Cannot remove $user: $cUID <br />";
