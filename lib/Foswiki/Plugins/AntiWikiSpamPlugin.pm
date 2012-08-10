@@ -43,11 +43,21 @@ sub initPlugin {
 }
 
 sub beforeSaveHandler {
+    if ( defined $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckTopics} ) {
+        return
+          unless ( $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckTopics} );
+    }
     require Foswiki::Plugins::AntiWikiSpamPlugin::Core;
     return Foswiki::Plugins::AntiWikiSpamPlugin::Core::beforeSaveHandler(@_);
 }
 
 sub beforeAttachmentSaveHandler {
+    if ( defined $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckAttachments} )
+    {
+        return
+          unless (
+            $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckAttachments} );
+    }
     require Foswiki::Plugins::AntiWikiSpamPlugin::Core;
     return
       Foswiki::Plugins::AntiWikiSpamPlugin::Core::beforeAttachmentSaveHandler(
@@ -56,6 +66,13 @@ sub beforeAttachmentSaveHandler {
 
 # Handler for $Foswiki::Plugins::VERSION 2.3 and later
 sub validateRegistrationHandler {
+    if (
+        defined $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckRegistrations} )
+    {
+        return
+          unless (
+            $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckRegistrations} );
+    }
     require Foswiki::Plugins::AntiWikiSpamPlugin::Core;
     return
       Foswiki::Plugins::AntiWikiSpamPlugin::Core::validateRegistrationHandler(
@@ -68,6 +85,13 @@ sub registrationHandler {
       if $Foswiki::Plugins::VERSION >=
           2.3;    # 2.3 uses validateRegistrationHandler
 
+    if (
+        defined $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckRegistrations} )
+    {
+        return
+          unless (
+            $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckRegistrations} );
+    }
     require Foswiki::Plugins::AntiWikiSpamPlugin::Core;
     return Foswiki::Plugins::AntiWikiSpamPlugin::Core::registrationHandler(@_);
 }

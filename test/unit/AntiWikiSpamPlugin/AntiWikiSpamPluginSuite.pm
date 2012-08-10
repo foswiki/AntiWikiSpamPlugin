@@ -27,7 +27,10 @@ sub set_up {
     $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{Enabled} = 1;
     $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{Module} =
       'Foswiki::Plugins::AntiWikiSpamPlugin';
-    $Foswiki::cfg{Register}{NeedVerification} = 0;
+    $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckTopics}        = 1;
+    $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckAttachments}   = 1;
+    $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckRegistrations} = 1;
+    $Foswiki::cfg{Register}{NeedVerification}                      = 0;
     undef $Foswiki::Plugins::AntiWikiSpamPlugin::regoWhite;
     undef $Foswiki::Plugins::AntiWikiSpamPlugin::regoBlack;
 }
@@ -42,6 +45,15 @@ sub tear_down {
 # Test removeUser REST handler
 sub test_RESTremoveUser {
     my $this = shift;
+
+    $this->assert(
+        Foswiki::Func::addUserToGroup(
+            $this->{test_user_wikiname},
+            $this->{test_user_wikiname} . 'Group',
+            1
+        )
+    );
+
     my $query =
       Unit::Request->new( { 'user' => $this->{test_user_wikiname}, } );
     $query->method('POST');
@@ -52,7 +64,12 @@ sub test_RESTremoveUser {
         rest => $REST_UI_FN,
         $this->{session}
     );
-    $this->assert_matches( qr/$this->{test_user_wikiname} removed/, $out );
+
+    #print STDERR $out;
+    $this->assert_matches(
+qr/user removed from Mapping Manager.*user removed from $this->{test_user_wikiname}Group.*user topic moved to Trash.*$this->{test_user_wikiname} processed/,
+        $out
+    );
 
     # Scumbag should be gone from the passwords DB
     # OK to use filenames; FoswikiFnTestCase forces password manager to
@@ -61,6 +78,12 @@ sub test_RESTremoveUser {
         `grep $this->{test_user_login} $Foswiki::cfg{Htpasswd}{FileName}`);
     $this->assert_null(
         `grep $this->{test_user_wikiname} $Foswiki::cfg{Htpasswd}{FileName}`);
+    $this->assert(
+        !Foswiki::Func::isGroupMember(
+            $this->{test_user_wikiname},
+            $this->{test_user_wikiname} . 'Group'
+        )
+    );
 
     my ( $crap, $wu ) = Foswiki::Func::readTopic( $Foswiki::cfg{UsersWebName},
         $Foswiki::cfg{UsersTopicName} );

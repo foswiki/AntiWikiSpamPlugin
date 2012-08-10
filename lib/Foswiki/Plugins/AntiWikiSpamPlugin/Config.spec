@@ -1,5 +1,17 @@
 # ---+ Extensions
 # ---++ AntiWikiSpamPlugin
+# **BOOLEAN**
+# Should topic text be checked against the spam regular expression list?
+$Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckTopics} = $TRUE;
+
+# **BOOLEAN**
+# Should attachment contents be checked against the spam regular expression list?
+$Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckAttachments} = $TRUE;
+
+# **BOOLEAN**
+# Should registrations be checked by the plugin?
+$Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckRegistrations} = $TRUE;
+
 # **URL**
 # URL where plugin should retrive the list of regular expressions that match spam postings.
 # The default site provides the MoinMoin antispam list: http://arch.thinkmo.de/cgi-bin/spam-merge
@@ -18,7 +30,7 @@ $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{GETLISTTIMEOUT} = 60;
 $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{BypassGroup} = 'AntiWikiSpamBypassGroup';
 
 # **NUMBER**
-# Number of potential spam regex matches that will result in blociking save and attach operations.
+# Number of potential spam regex matches that will result in blocking save and attach operations.
 # Default is 1, blocking on a single match.  Set to -1 to "simulate" operation by logging, but not blocking any actions.
 # If un-set, then the default is 1.
 $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{HitThreshold} = 1;
