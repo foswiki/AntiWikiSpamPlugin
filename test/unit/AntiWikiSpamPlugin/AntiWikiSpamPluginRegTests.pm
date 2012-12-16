@@ -1,4 +1,4 @@
-package AntiWikiSpamPluginSuite;
+package AntiWikiSpamPluginRegTests;
 
 # SMELL: this test suite was retro-fitted to an existing plugin, and
 # does *not* test spam removal from topics. It *only* tests the
@@ -22,8 +22,8 @@ sub new {
 sub set_up {
     my $this = shift;
     $this->SUPER::set_up();
-
     $REST_UI_FN ||= $this->getUIFn('rest');
+
     $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{Enabled} = 1;
     $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{Module} =
       'Foswiki::Plugins::AntiWikiSpamPlugin';
@@ -31,6 +31,7 @@ sub set_up {
     $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckAttachments}   = 1;
     $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckRegistrations} = 1;
     $Foswiki::cfg{Register}{NeedVerification}                      = 0;
+    $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{ANTISPAMREGEXLISTURL} = '';
     undef $Foswiki::Plugins::AntiWikiSpamPlugin::regoWhite;
     undef $Foswiki::Plugins::AntiWikiSpamPlugin::regoBlack;
 }
@@ -118,6 +119,7 @@ sub test_denySelfImmolation {
 
 sub test_spamRegistration {
     my $this = shift;
+    $Foswiki::cfg{Validation}{Method} = 'none';
 
     Foswiki::Func::saveTopic( $this->{test_web}, 'WhiteList', undef, <<'TEXT');
 <verbatim>
@@ -128,12 +130,21 @@ TEXT
 <verbatim>
 badrobot
 ^76\.74\.239\.26 # mailinator.com
+^72\.51\.33\.80 # another mailinator address
 </verbatim>
 TEXT
     $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{RegistrationWhiteList} =
       "$this->{test_web}.WhiteList";
     $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{RegistrationBlackList} =
       "$this->{test_web}.BlackList";
+    $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{Enabled} = 1;
+    $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{Module} =
+      'Foswiki::Plugins::AntiWikiSpamPlugin';
+    $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckTopics}        = 1;
+    $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckAttachments}   = 1;
+    $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckRegistrations} = 1;
+    $Foswiki::cfg{Register}{NeedVerification}                      = 0;
+    $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{ANTISPAMREGEXLISTURL} = '';
 
     # Does not match whitelist
     my $qd = {
@@ -151,7 +162,12 @@ TEXT
     $this->createNewFoswikiSession( $Foswiki::cfg{DefaultUserLogin}, $query );
     $this->{session}->net->setMailHandler( \&FoswikiFnTestCase::sentMail );
     try {
-        Foswiki::UI::Register::registerAndNext( $this->{session} );
+        if (Foswiki::UI::Register->can('_action_register')) {
+            Foswiki::UI::Register::_action_register( $this->{session} );
+        }
+        else {
+            Foswiki::UI::Register::registerAndNext( $this->{session} );
+        }
     }
     catch Foswiki::OopsException with {
         my $e = shift;
@@ -160,7 +176,7 @@ TEXT
             $e->{params}->[0] );
     }
     otherwise {
-        $this->assert(0);
+        $this->assert(0, 'SPAM Registration was permitted');
     };
 
     # matches whitelist, matches blacklist
@@ -169,7 +185,12 @@ TEXT
     $this->createNewFoswikiSession( $Foswiki::cfg{DefaultUserLogin}, $query );
     $this->{session}->net->setMailHandler( \&FoswikiFnTestCase::sentMail );
     try {
-        Foswiki::UI::Register::registerAndNext( $this->{session} );
+        if (Foswiki::UI::Register->can('_action_register')) {
+            Foswiki::UI::Register::_action_register( $this->{session} );
+        }
+        else {
+            Foswiki::UI::Register::registerAndNext( $this->{session} );
+        }
     }
     catch Foswiki::OopsException with {
         my $e = shift;
@@ -187,7 +208,12 @@ TEXT
     $this->createNewFoswikiSession( $Foswiki::cfg{DefaultUserLogin}, $query );
     $this->{session}->net->setMailHandler( \&FoswikiFnTestCase::sentMail );
     try {
-        Foswiki::UI::Register::registerAndNext( $this->{session} );
+        if (Foswiki::UI::Register->can('_action_register')) {
+            Foswiki::UI::Register::_action_register( $this->{session} );
+        }
+        else {
+            Foswiki::UI::Register::registerAndNext( $this->{session} );
+        }
     }
     catch Foswiki::OopsException with {
         my $e = shift;
@@ -205,7 +231,12 @@ TEXT
     $this->createNewFoswikiSession( $Foswiki::cfg{DefaultUserLogin}, $query );
     $this->{session}->net->setMailHandler( \&FoswikiFnTestCase::sentMail );
     try {
-        Foswiki::UI::Register::registerAndNext( $this->{session} );
+        if (Foswiki::UI::Register->can('_action_register')) {
+            Foswiki::UI::Register::_action_register( $this->{session} );
+        }
+        else {
+            Foswiki::UI::Register::registerAndNext( $this->{session} );
+        }
     }
     catch Foswiki::OopsException with {
         my $e = shift;

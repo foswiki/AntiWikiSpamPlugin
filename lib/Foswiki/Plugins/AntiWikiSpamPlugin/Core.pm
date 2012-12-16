@@ -375,9 +375,11 @@ sub _getPluginPrefs {
     }
     else {
         $bypassGroup =
-          $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{ANTISPAMBYPASSGROUP} || '';
+             $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{BypassGroup}
+          || $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{ANTISPAMBYPASSGROUP}
+          || '';
         if ($bypassGroup) {
-            $bypassFail = Foswiki::Func::isGroupMember("$bypassGroup");
+            $bypassFail = Foswiki::Func::isGroupMember("$bypassGroup") || 0;
         }
     }
 
