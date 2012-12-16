@@ -27,10 +27,10 @@ sub set_up {
     $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{Enabled} = 1;
     $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{Module} =
       'Foswiki::Plugins::AntiWikiSpamPlugin';
-    $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckTopics}        = 1;
-    $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckAttachments}   = 1;
-    $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckRegistrations} = 1;
-    $Foswiki::cfg{Register}{NeedVerification}                      = 0;
+    $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckTopics}          = 1;
+    $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckAttachments}     = 1;
+    $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckRegistrations}   = 1;
+    $Foswiki::cfg{Register}{NeedVerification}                        = 0;
     $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{ANTISPAMREGEXLISTURL} = '';
     undef $Foswiki::Plugins::AntiWikiSpamPlugin::regoWhite;
     undef $Foswiki::Plugins::AntiWikiSpamPlugin::regoBlack;
@@ -140,10 +140,10 @@ TEXT
     $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{Enabled} = 1;
     $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{Module} =
       'Foswiki::Plugins::AntiWikiSpamPlugin';
-    $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckTopics}        = 1;
-    $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckAttachments}   = 1;
-    $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckRegistrations} = 1;
-    $Foswiki::cfg{Register}{NeedVerification}                      = 0;
+    $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckTopics}          = 1;
+    $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckAttachments}     = 1;
+    $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckRegistrations}   = 1;
+    $Foswiki::cfg{Register}{NeedVerification}                        = 0;
     $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{ANTISPAMREGEXLISTURL} = '';
 
     # Does not match whitelist
@@ -162,7 +162,7 @@ TEXT
     $this->createNewFoswikiSession( $Foswiki::cfg{DefaultUserLogin}, $query );
     $this->{session}->net->setMailHandler( \&FoswikiFnTestCase::sentMail );
     try {
-        if (Foswiki::UI::Register->can('_action_register')) {
+        if ( Foswiki::UI::Register->can('_action_register') ) {
             Foswiki::UI::Register::_action_register( $this->{session} );
         }
         else {
@@ -176,7 +176,7 @@ TEXT
             $e->{params}->[0] );
     }
     otherwise {
-        $this->assert(0, 'SPAM Registration was permitted');
+        $this->assert( 0, 'SPAM Registration was permitted' );
     };
 
     # matches whitelist, matches blacklist
@@ -185,7 +185,7 @@ TEXT
     $this->createNewFoswikiSession( $Foswiki::cfg{DefaultUserLogin}, $query );
     $this->{session}->net->setMailHandler( \&FoswikiFnTestCase::sentMail );
     try {
-        if (Foswiki::UI::Register->can('_action_register')) {
+        if ( Foswiki::UI::Register->can('_action_register') ) {
             Foswiki::UI::Register::_action_register( $this->{session} );
         }
         else {
@@ -208,7 +208,7 @@ TEXT
     $this->createNewFoswikiSession( $Foswiki::cfg{DefaultUserLogin}, $query );
     $this->{session}->net->setMailHandler( \&FoswikiFnTestCase::sentMail );
     try {
-        if (Foswiki::UI::Register->can('_action_register')) {
+        if ( Foswiki::UI::Register->can('_action_register') ) {
             Foswiki::UI::Register::_action_register( $this->{session} );
         }
         else {
@@ -231,7 +231,7 @@ TEXT
     $this->createNewFoswikiSession( $Foswiki::cfg{DefaultUserLogin}, $query );
     $this->{session}->net->setMailHandler( \&FoswikiFnTestCase::sentMail );
     try {
-        if (Foswiki::UI::Register->can('_action_register')) {
+        if ( Foswiki::UI::Register->can('_action_register') ) {
             Foswiki::UI::Register::_action_register( $this->{session} );
         }
         else {

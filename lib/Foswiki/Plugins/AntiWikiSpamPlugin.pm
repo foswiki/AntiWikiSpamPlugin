@@ -83,7 +83,7 @@ sub validateRegistrationHandler {
 sub registrationHandler {
     return
       if $Foswiki::Plugins::VERSION >=
-          2.3;    # 2.3 uses validateRegistrationHandler
+      2.3;    # 2.3 uses validateRegistrationHandler
 
     if (
         defined $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckRegistrations} )
