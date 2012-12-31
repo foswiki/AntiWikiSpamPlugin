@@ -32,15 +32,15 @@ sub set_up {
     $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckRegistrations}   = 1;
     $Foswiki::cfg{Register}{NeedVerification}                        = 0;
     $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{ANTISPAMREGEXLISTURL} = '';
-    undef $Foswiki::Plugins::AntiWikiSpamPlugin::regoWhite;
-    undef $Foswiki::Plugins::AntiWikiSpamPlugin::regoBlack;
+    undef $Foswiki::Plugins::AntiWikiSpamPlugin::Core::regoWhite;
+    undef $Foswiki::Plugins::AntiWikiSpamPlugin::Core::regoBlack;
 }
 
 sub tear_down {
     my $this = shift;
     $this->SUPER::tear_down();
-    undef $Foswiki::Plugins::AntiWikiSpamPlugin::regoWhite;
-    undef $Foswiki::Plugins::AntiWikiSpamPlugin::regoBlack;
+    undef $Foswiki::Plugins::AntiWikiSpamPlugin::Core::regoWhite;
+    undef $Foswiki::Plugins::AntiWikiSpamPlugin::Core::regoBlack;
 }
 
 # Test removeUser REST handler
@@ -178,6 +178,12 @@ TEXT
     otherwise {
         $this->assert( 0, 'SPAM Registration was permitted' );
     };
+    $this->assert(
+        !Foswiki::Func::topicExists(
+            $Foswiki::cfg{UsersWebName},
+            'MustaphaGoody'
+        )
+    );
 
     # matches whitelist, matches blacklist
     $qd->{Fwk1Email} = ['mustapha@badrobot.org'];
@@ -201,6 +207,12 @@ TEXT
     otherwise {
         $this->assert(0);
     };
+    $this->assert(
+        !Foswiki::Func::topicExists(
+            $Foswiki::cfg{UsersWebName},
+            'MustaphaGoody'
+        )
+    );
 
     # matches whitelist, matches IP in blacklist
     $qd->{Fwk1Email} = ['mustapha@safetymail.info'];
@@ -224,6 +236,12 @@ TEXT
     otherwise {
         $this->assert(0);
     };
+    $this->assert(
+        !Foswiki::Func::topicExists(
+            $Foswiki::cfg{UsersWebName},
+            'MustaphaGoody'
+        )
+    );
 
     # matches whitelist, does not match blacklist => good rego
     $qd->{Fwk1Email} = ['mustapha@mustapha.good.time.info'];
@@ -249,6 +267,12 @@ qr/A confirmation e-mail has been sent to mustapha\@mustapha.good.time.info/,
     otherwise {
         $this->assert(0);
     };
+    $this->assert(
+        Foswiki::Func::topicExists(
+            $Foswiki::cfg{UsersWebName},
+            'MustaphaGoody'
+        )
+    );
 }
 
 1;

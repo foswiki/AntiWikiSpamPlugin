@@ -43,7 +43,7 @@ sub tear_down {
 }
 
 #SMELL: Enabling this test breaks the AntiWikiSpamPluginRegTests ???
-sub disable_test_spamSaveTopic {
+sub test_spamSaveTopic {
     my $this = shift;
 
     my ( $meta, $text );
@@ -81,7 +81,6 @@ TEXT
     };
 
     $text = Foswiki::Func::readTopicText( $this->{test_web}, 'SpamTopic' );
-    print STDERR "Read $text\n";
 
 }
 

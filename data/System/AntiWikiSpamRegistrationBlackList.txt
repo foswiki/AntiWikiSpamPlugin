@@ -11,6 +11,7 @@ escape full-stops in regular expressions!
 
 <verbatim>
 ^76\.74\.239\.26$ # mailinator.com
+^72\.51\.33\.80$ # another mailinator
 </verbatim>
 
    * Set ALLOWTOPICVIEW = %USERSWEB%.AdminGroup

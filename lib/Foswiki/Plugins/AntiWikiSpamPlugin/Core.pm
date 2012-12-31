@@ -148,6 +148,7 @@ sub validateRegistrationHandler {
     }
     print STDERR "white: $white black: $black\n" if MONITOR;
     unless ( $white && !$black ) {
+        print STDERR "REJECTED\n" if MONITOR;
         $Foswiki::Plugins::SESSION->logger->log( 'warning',
 "Registration of $data->{WikiName} ($data->{Email}) rejected by AntiWikiSpamPlugin: white: $white black: $black"
         );
@@ -485,27 +486,23 @@ sub _removeUser {
     ( my $web, $wikiname ) =
       Foswiki::Func::normalizeWebTopicName( $Foswiki::cfg{UsersWebName},
         $wikiname );
+
     if ( Foswiki::Func::topicExists( $web, $wikiname ) ) {
 
-        # Spoof the user so we can delete their topic. Don't need to
-        # do this for the REST handler, but we do for the registration
-        # abort.
-        my $safe = $Foswiki::Plugins::SESSION->{user};
-
         my $newTopic = "SuspectSpammer$wikiname" . time;
-        try {
-            Foswiki::Func::moveTopic( $web, $wikiname,
-                $Foswiki::cfg{TrashWebName}, $newTopic );
-            $message .=
-" - user topic moved to $Foswiki::cfg{TrashWebName}.$newTopic <br/>";
-            $logMessage .=
-              "User topic moved to $Foswiki::cfg{TrashWebName}.$newTopic, ";
-        }
-        finally {
 
-            # Restore the original user
-            $Foswiki::Plugins::SESSION->{user} = $safe;
-        };
+        my $from =
+          Foswiki::Meta->new( $Foswiki::Plugins::SESSION, $web, $wikiname );
+        my $to =
+          Foswiki::Meta->new( $Foswiki::Plugins::SESSION,
+            $Foswiki::cfg{TrashWebName}, $newTopic );
+
+        $from->move($to);
+
+        $message .=
+          " - user topic moved to $Foswiki::cfg{TrashWebName}.$newTopic <br/>";
+        $logMessage .=
+          "User topic moved to $Foswiki::cfg{TrashWebName}.$newTopic, ";
     }
     else {
         $message    .= " - user topic not found <br/>";

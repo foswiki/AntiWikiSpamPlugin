@@ -97,7 +97,8 @@ To cause a true failure, remove the VIEW and CHANGE restrictions to the topic an
 |  Version: | %$VERSION% |
 |  Release: | %$RELEASE% |
 |  Change History: | <!-- versions below in reverse order -->&nbsp; |
-|  1.5 (15 Dec 2012) | Foswikitask:Item12296: !BypassGroup doesn't work, also unit tests don't work on trunk. |
+|  1.5 (31 Dec 2012) | Foswikitask:Item12296: !BypassGroup doesn't work, also unit tests don't work on trunk.%BR%\
+                       Foswikitask:Item12323: Fails to remove user topic on Foswiki 1.1.x |
 |  1.4 (10 Aug 2012) | Foswikitask:Item11679: When removing a user, remove it from any groups.<br />\
                        Foswikitask:Item12038: Allow checking to be disabled |
 |  1.3.1 (19 Mar 2012) | Remove dialog would remove current user if entered user was not konwn to the Mapper. |
