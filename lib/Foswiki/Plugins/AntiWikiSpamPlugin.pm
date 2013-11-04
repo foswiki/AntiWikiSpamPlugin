@@ -35,8 +35,9 @@ sub initPlugin {
     Foswiki::Func::registerRESTHandler(
         'removeUser', \&_RESTremoveUser,
         authenticate => 1,
-        validate     => 1,
-        http_allow   => 'POST'
+        validate   => $Foswiki::cfg{Validation}{Method} eq 'strikeone' ? 1 : 0,
+        http_allow => 'POST'
+
     );
 
     return 1;
