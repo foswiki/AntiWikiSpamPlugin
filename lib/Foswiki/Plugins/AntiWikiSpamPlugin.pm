@@ -30,13 +30,20 @@ sub initPlugin {
     my ( $topic, $web, $user, $installWeb ) = @_;
 
     #forceUpdate
-    Foswiki::Func::registerRESTHandler( 'forceUpdate', \&_RESTforceUpdate );
+    Foswiki::Func::registerRESTHandler(
+        'forceUpdate', \&_RESTforceUpdate,
+        authenticate => 1,
+        validate     => 0,
+        http_allow   => 'POST',
+        description  => 'Run a manual update of the spam regular expressions.',
+    );
 
     Foswiki::Func::registerRESTHandler(
         'removeUser', \&_RESTremoveUser,
         authenticate => 1,
-        validate   => $Foswiki::cfg{Validation}{Method} eq 'strikeone' ? 1 : 0,
-        http_allow => 'POST'
+        validate    => $Foswiki::cfg{Validation}{Method} eq 'strikeone' ? 1 : 0,
+        http_allow  => 'POST',
+        description => 'Allow administrators to remove registered users.',
 
     );
 

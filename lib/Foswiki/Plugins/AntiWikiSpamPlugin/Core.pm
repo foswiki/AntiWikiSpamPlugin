@@ -187,6 +187,18 @@ sub registrationHandler {
 }
 
 sub _RESTforceUpdate {
+
+    unless ( Foswiki::Func::isAnAdmin() ) {
+        my $response = $Foswiki::Plugins::SESSION->{response};
+        $response->header(
+            -status  => 500,
+            -type    => 'text/plain',
+            -charset => 'UTF-8'
+        );
+        $response->print('forceUpdate is only available to administrators');
+        return;
+    }
+
     _writeDebug('about to forceUpdate');
     _downloadRegexUpdate(1);
     _writeDebug('forceUpdate complete');
