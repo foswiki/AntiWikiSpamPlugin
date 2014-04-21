@@ -4,8 +4,9 @@ package Foswiki::Plugins::AntiWikiSpamPlugin::Core;
 use Error qw(:try);
 use strict;
 
-require Foswiki::Func;       # The plugins API
-require Foswiki::Plugins;    # For the API version
+require Foswiki::Func;            # The plugins API
+require Foswiki::Plugins;         # For the API version
+require Foswiki::LoginManager;    # Use static routine to delete sessions
 
 our $pluginName = 'AntiWikiSpamPlugin';
 my $bypassFail   = 0;
@@ -34,8 +35,8 @@ sub beforeSaveHandler {
 
 sub beforeAttachmentSaveHandler {
     ### my ( $attachmentAttr, $topic, $web ) = @_;
-    my $attachmentName = $_[0]->{"attachment"};
-    my $tmpFilename    = $_[0]->{"tmpFilename"};
+    my $attachmentName = $_[0]->{'attachment'};
+    my $tmpFilename    = $_[0]->{'tmpFilename'};
     my $text           = Foswiki::Func::readFile($tmpFilename);
     my $wikiName       = Foswiki::Func::getWikiName();
 
@@ -445,6 +446,8 @@ sub _makeRegexList {
 sub _removeUser {
     my $user = shift;
 
+    ($user) = $user =~ m/($Foswiki::cfg{LoginNameFilterIn})/;
+
     # Obtain all the user info before removing things.   If there is no mapping
     # for the user, then assume the entered username will be removed.
     my $cUID     = Foswiki::Func::getCanonicalUserID($user);
@@ -463,12 +466,27 @@ sub _removeUser {
     # Remove the user from the mapping manager
     if ( $cUID && $Foswiki::Plugins::SESSION->{users}->userExists($cUID) ) {
         $Foswiki::Plugins::SESSION->{users}->removeUser($cUID);
-        $message    .= " - user removed from Mapping Manager <br/>";
-        $logMessage .= "Mapping removed, ";
+        $message    .= ' - user removed from Mapping Manager <br/>';
+        $logMessage .= 'Mapping removed, ';
     }
     else {
-        $message    .= " - User not known to the Mapping Manager <br/>";
-        $logMessage .= "unknown to Mapping, ";
+        $message    .= ' - User not known to the Mapping Manager <br/>';
+        $logMessage .= 'unknown to Mapping, ';
+    }
+
+    # Kill any user sessions by removing the session files
+    my $uid = $cUID || $wikiname;
+    my $uSess;
+    if ( Foswiki::LoginManager->can('removeUserSessions') ) {
+        $uSess = Foswiki::LoginManager::removeUserSessions($uid);
+    }
+    else {
+        $uSess = removeUserSessions($uid);
+    }
+
+    if ($uSess) {
+        $message    .= " - removed $uSess <br />";
+        $logMessage .= "removed: $uSess, ";
     }
 
     # If a group topic has been entered, don't remove it.
@@ -480,7 +498,7 @@ sub _removeUser {
 
     # Remove the user from any groups.
     my $it = Foswiki::Func::eachGroup();
-    $logMessage .= "Removed from groups: ";
+    $logMessage .= 'Removed from groups: ';
     while ( $it->hasNext() ) {
         my $group = $it->next();
 
@@ -488,7 +506,7 @@ sub _removeUser {
         if (
             Foswiki::Func::isGroupMember( $group, $wikiname, { expand => 0 } ) )
         {
-            $message    .= "user removed from $group <br />";
+            $message    .= " - user removed from $group <br />";
             $logMessage .= "$group, ";
             Foswiki::Func::removeUserFromGroup( $wikiname, $group );
         }
@@ -517,10 +535,49 @@ sub _removeUser {
           "User topic moved to $Foswiki::cfg{TrashWebName}.$newTopic, ";
     }
     else {
-        $message    .= " - user topic not found <br/>";
-        $logMessage .= " User topic not found, ";
+        $message    .= ' - user topic not found <br/>';
+        $logMessage .= ' User topic not found, ';
     }
     return ( $message, $logMessage );
+}
+
+=begin TML
+
+---++ StaticMethod removeUserSessions()
+
+This code has been copied from Foswiki 1.2 lib/Foswiki/LoginManager.pm
+
+Delete session files for a user that is being removed from the system.
+Removing the Session prevents any further damage from a spammer when the
+account has been removed.
+
+This is a static method, but requires Foswiki::cfg. It is designed to be
+run from a session.
+
+=cut
+
+sub removeUserSessions {
+    my $user = shift;
+    my $msg  = '';
+
+    opendir( my $tmpdir, "$Foswiki::cfg{WorkingDir}/tmp" ) || return '';
+    foreach my $fn ( grep( /^cgisess_/, readdir($tmpdir) ) ) {
+        my ($file) = $fn =~ m/^(cgisess_.*)$/;
+
+        open my $sessfile, '<', "$Foswiki::cfg{WorkingDir}/tmp/$file"
+          or next;
+        while (<$sessfile>) {
+            if (m/'AUTHUSER' => '$user'/) {
+                close $sessfile;
+                unlink "$Foswiki::cfg{WorkingDir}/tmp/$file";
+                $msg .= $file . ', ';
+                last;
+            }
+        }
+        close $sessfile if $sessfile;
+    }
+    closedir $tmpdir;
+    return $msg;
 }
 
 1;
@@ -528,7 +585,7 @@ __END__
 Plugin for Foswiki - The Free and Open Source Wiki, http://foswiki.org/
 
 Copyright (C) 2005-2009 Sven Dowideit SvenDowideit@wikiring.com
-Copyright (C) 2009-2012 George Clark
+Copyright (C) 2009-2014 George Clark
 Copyright (C) 2012 Crawford Currie http://c-dot.co.uk
 
 AntiWikiSpamPlugin is distributed in the hope that it will be useful,
