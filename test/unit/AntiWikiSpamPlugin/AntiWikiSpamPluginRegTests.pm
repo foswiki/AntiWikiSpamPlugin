@@ -68,7 +68,7 @@ sub test_RESTremoveUser {
 
     #print STDERR $out;
     $this->assert_matches(
-qr/user removed from Mapping Manager.*user removed from $this->{test_user_wikiname}Group.*user topic moved to Trash.*$this->{test_user_wikiname} processed/,
+qr/user removed from Mapping Manager.*removed cgisess_.*user removed from $this->{test_user_wikiname}Group.*user topic moved to Trash.*$this->{test_user_wikiname} processed/,
         $out
     );
 
@@ -131,6 +131,7 @@ TEXT
 badrobot
 ^76\.74\.239\.26 # mailinator.com
 ^72\.51\.33\.80 # another mailinator address
+^207\.198\.106\.56 # and another
 </verbatim>
 TEXT
     $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{RegistrationWhiteList} =
