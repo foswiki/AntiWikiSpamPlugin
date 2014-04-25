@@ -10,17 +10,12 @@
 
 ---++ Stop your wiki getting spammed
 
-This plugin attempts to reduce the instance of Wiki Spam by using the
-[[http://moinmo.in/MoinMoinWiki][MoinMoin]]
-[[http://moinmo.in/AntiSpamGlobalSolution][AntiSpamGlobalSolution]]
-regex's.  Anytime it detects that a saved page contains a string in the regex
-list, it _only_ refuses to save it.
+This plugin attempts to reduce the instance of Wiki Spam by using the [[http://moinmo.in/MoinMoinWiki][MoinMoin]] [[http://moinmo.in/AntiSpamGlobalSolution][AntiSpamGlobalSolution]]
+regex's.  Anytime it detects that a saved page contains a string in the regex list, it _only_ refuses to save it.
 
 *Major premise is not to create any unnecessary load on the server and not to use excess server resources by holding connections open.*
 
-All its processing is _only_ done on =save=, or on =attach=.
-(Foswiki:Extensions/BlackListPlugin does alot of processing on _every_ topic operation,
-including view)
+All its processing is _only_ done on =save=, or on =attach=.  (Foswiki:Extensions/BlackListPlugin does a lot of processing on _every_ topic operation, including view)
 
 ---+++ Features
 
@@ -31,15 +26,15 @@ including view)
       * Scans attachments before save (Not recommended!)
 
    * User registration features
-      * Checks new registrations against White and Black lists
+      * Checks new registrations against White and Black lists by either domain or IP address.
       * Provides a facility to remove users.
 
-It can check Attachments for spam strings and some javascript exploits, however attachment checking is extremely slow and not recommended.  This
+The attachment scan for spam strings and some javascript exploits is extremely slow and not recommended, especially for large binary attachments. This
 feature is now disabled by default.
 
 ---+++ Spam signatures
 
-This plugin can use a timeout on save to check if the spam signature list has changed, This is no longer recommended.  For best performance, 
+This plugin can use a timeout on save to check if the spam signature list has changed, This is no longer recommended.  For best performance,
 manually update the signatures.
 
 To manually update the list, click
@@ -49,11 +44,32 @@ To manually update the list, click
 (Admin authority required!)
 
 The retrieve of the !MoinMoin regex list can still take some seconds which will delay topic saves when the list needs to be refreshed.  Good
-network connectivity is a must For best performance.  The recommended solution is to refresh the list using the =rest= script from a scheduled cron job
+network connectivity is a must.  If the configured server is not reachable, then save will be delayed or fail.
+The recommended solution is to refresh the list using the provided =rest= script from a scheduled cron job, and disable =$Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{AutoUpdateSignatures}=  (This is now the default configuration)
 <verbatim>
 cd [foswiki-bin-directory]
 ./rest /AntiWikiSpamPlugin/forceUpdate</verbatim>
-Then disable =$Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{AutoUpdateSignatures}=  (This is now the default configuration)
+
+Here is a sample =crontab= entry to run the signature refresh at 10 past the hour.
+The ouptut is sent to a logfile.
+<verbatim>
+10      *       *       *       *       cd /path/to/foswiki/bin && perl -T rest /AntiWikiSpamPlugin/forceUpdate  /path/to/foswiki/working/logs/LastSpamUpdate.log 2>&1
+</verbatim>
+
+
+---+++ Registration control
+
+Registration is controlled by limiting the email domains that can be used by people registering to the wiki.
+For example, you can set up a whitelist so that only people with a corporate email address can register, or set up a blacklist to filter known email hosts that spammers use.
+
+The lists are held in topics, usually called %SYSTEMWEB%.AntiWikiSpamRegistrationWhiteList and %SYSTEMWEB%.AntiWikiSpamRegistrationWhiteList.
+Sample topics are provided. Each topic is a simple list of Perl regular expressions.  The domain of the email address is tested against the regular expressions. If there is no match
+then the domain is reversed to an IP address, and it is also checked agains the list.  At least one expression in the whitelist must match the email address to permit registration.
+If any expression in the blacklist matches, registration will be denied.
+
+The core foswiki feature, added in Foswiki-1.1.5, provides a similar facility but only checks by email address domain.  It is a simpler implementation and has lower overhead.
+The core filter is set as an expert parameter in the Foswiki configuration ={Register}{EmailFilter}=, in the "Security and Authentication" section, Registration tab.
+The White and Black lists provided by this extension will do a DNS lookup and can also block by IP Address of the registrant.
 
 ---+++ Removing User Accounts
 
@@ -73,14 +89,7 @@ provides a REST handler that can remove user accounts from the wiki, which you c
 <input type="submit" class="foswikiSubmit" value="Remove User" />
 </form>
 
----+++ Registration control
-
-Registration is controlled by limiting the email domains that can be used by people registering to the wiki. 
-For example, you can set up a whitelist so that only people with a corporate email address can register, or set up a blacklist to filter known email hosts that spammers use.
-
-The lists are held in topics, usually called %SYSTEMWEB%.AntiWikiSpamRegistrationWhiteList and %SYSTEMWEB%.AntiWikiSpamRegistrationWhiteList. 
-Sample topics are provided. Each topic is a simple list of Perl regular expressions. At least one expression in the whitelist must match the email address to permit registration. 
-If any expression in the blacklist matches, registration will be denied.
+This feature will be included as a core Foswiki feature in Foswiki 1.2.
 
 ---++ Configuration
 
@@ -119,7 +128,7 @@ To cause a true failure, remove the VIEW and CHANGE restrictions to the topic an
 |  Version: | %$VERSION% |
 |  Release: | %$RELEASE% |
 |  Change History: | <!-- versions below in reverse order --> |
-|  1.6 (24 Apr 2014) | Foswikitask:Item12349, Foswikitask:Item12629: Download of signatures brings down performance<br />\
+|  1.6 (25 Apr 2014) | Foswikitask:Item12349, Foswikitask:Item12629: Download of signatures brings down performance<br />\
                        Foswikitask:Item12410, Foswikitask:Item12634: Attachment upload fails as checking them exceeds backend resources<br />\
                        Foswikitask:Item12411: rest validates the CSRF signature even if validation disabled in core.<br />\
                        Foswikitask:Item12699: Removing a user should also remove any cgisess files to kill current sessions. |

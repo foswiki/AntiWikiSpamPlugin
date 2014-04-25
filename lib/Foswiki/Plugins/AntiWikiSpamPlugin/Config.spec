@@ -12,7 +12,8 @@ $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckTopics} = $TRUE;
 $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckAttachments} = $FALSE;
 
 # **BOOLEAN**
-# Should registrations be checked by the plugin?
+# Should registrations be checked by the plugin?.  Foswiki versions 1.1.5 and
+# newer can also use the Registration EmailFilter for a simpler email address check
 $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckRegistrations} = $TRUE;
 
 # **URL**

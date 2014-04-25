@@ -146,7 +146,7 @@ __END__
 Plugin for Foswiki - The Free and Open Source Wiki, http://foswiki.org/
 
 Copyright (C) 2005-2009 Sven Dowideit SvenDowideit@wikiring.com
-Copyright (C) 2009-2012 George Clark
+Copyright (C) 2009-2014 George Clark
 Copyright (C) 2012 Crawford Currie http://c-dot.co.uk
 
 AntiWikiSpamPlugin is distributed in the hope that it will be useful,
