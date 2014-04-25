@@ -1,4 +1,4 @@
-%META:TOPICINFO{author="ProjectContributor" date="1397094434" format="1.1" version="1"}%
+%META:TOPICINFO{author="ProjectContributor" date="1398394176" format="1.1" version="1"}%
 ---+!! !AntiWikiSpamPlugin
 
 <!--
@@ -16,17 +16,31 @@ This plugin attempts to reduce the instance of Wiki Spam by using the
 regex's.  Anytime it detects that a saved page contains a string in the regex
 list, it _only_ refuses to save it.
 
-It can also check new registrations to see if the email address used matches a blacklist (or whitelist).
-
 *Major premise is not to create any unnecessary load on the server and not to use excess server resources by holding connections open.*
 
 All its processing is _only_ done on =save=, or on =attach=.
 (Foswiki:Extensions/BlackListPlugin does alot of processing on _every_ topic operation,
 including view)
 
-It uses a timeout on save to check if the list has changed, so if there are no
-saves, there is no un-needed network traffic.  Alternatively the regex list
-can be loaded by a cron script to minimize save overhead.
+---+++ Features
+
+   * Anti-spam features:
+      * Fetches the spam signatures automatically (Not recommended!)
+      * Scans each topic during Save and blocks save if a threshold of spam matches is exceeded.
+      * Provides an exception for trusted users identified by a spam bypass group.
+      * Scans attachments before save (Not recommended!)
+
+   * User registration features
+      * Checks new registrations against White and Black lists
+      * Provides a facility to remove users.
+
+It can check Attachments for spam strings and some javascript exploits, however attachment checking is extremely slow and not recommended.  This
+feature is now disabled by default.
+
+---+++ Spam signatures
+
+This plugin can use a timeout on save to check if the spam signature list has changed, This is no longer recommended.  For best performance, 
+manually update the signatures.
 
 To manually update the list, click
 <form name="spamupddate" action="%SCRIPTURLPATH{rest}%/%TOPIC%/forceUpdate" method="post">
@@ -34,22 +48,22 @@ To manually update the list, click
 </form>
 (Admin authority required!)
 
-Note that the retrieve of the !MoinMoin regex list can still take some seconds
-which will delay topic saves when the list needs to be refreshed.  For best
-performance:
-   * Refresh the list using the =rest= script from a scheduled cron job
+The retrieve of the !MoinMoin regex list can still take some seconds which will delay topic saves when the list needs to be refreshed.  Good
+network connectivity is a must For best performance.  The recommended solution is to refresh the list using the =rest= script from a scheduled cron job
 <verbatim>
 cd [foswiki-bin-directory]
 ./rest /AntiWikiSpamPlugin/forceUpdate</verbatim>
-   * Set the =GETLISTTIMEOUT= to a very large number so that the cron job will be the only source of updates
+Then disable =$Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{AutoUpdateSignatures}=  (This is now the default configuration)
 
----++ Removing User Accounts
+---+++ Removing User Accounts
 
 Normally user accounts should not be removed, as they represent the history of topic changes.  In addition if the WikiName is reused, the new user "assumes"
 the history of the prior user.   However, when dealing with spam registrations, it's generally recommended to remove the accounts. This plugin
 provides a REST handler that can remove user accounts from the wiki, which you can access through the following form.
    * The User will be removed from the Mapping manager if supported
+      * On Foswiki versions prior to Foswiki 1.1.4,  the user will not be removed from the WikiUsers topic.
    * The User will be removed from any groups
+   * The session file is removed to force loss of authentication of the user.
    * The User topic and any attachments are moved to the %TRASHWEB% Web as =SuspectSpammer&lt;WikiName&gt;&lt;timestamp&gt;=
 *This function is only available to Administrators*
 
@@ -59,17 +73,25 @@ provides a REST handler that can remove user accounts from the wiki, which you c
 <input type="submit" class="foswikiSubmit" value="Remove User" />
 </form>
 
+---+++ Registration control
+
+Registration is controlled by limiting the email domains that can be used by people registering to the wiki. 
+For example, you can set up a whitelist so that only people with a corporate email address can register, or set up a blacklist to filter known email hosts that spammers use.
+
+The lists are held in topics, usually called %SYSTEMWEB%.AntiWikiSpamRegistrationWhiteList and %SYSTEMWEB%.AntiWikiSpamRegistrationWhiteList. 
+Sample topics are provided. Each topic is a simple list of Perl regular expressions. At least one expression in the whitelist must match the email address to permit registration. 
+If any expression in the blacklist matches, registration will be denied.
+
 ---++ Configuration
 
-The configuration of this plugin is done using the %SCRIPTURL{"configure"}%
-tool.  There are 5 settings used to control the operation and aggressiveness of
-the spam filter:
+The configuration of this plugin is done using the %SCRIPTURL{"configure"}% tool:
 
 %TABLE{sort="off"}%
 | *Setting* | *Definition* | *Default* |
 | ={Plugins}{AntiWikiSpamPlugin}{CheckTopics}= | Enable to check topic text against the spam regular expressions | (enabled) |
-| ={Plugins}{AntiWikiSpamPlugin}{CheckAttachments}= | Enable to check attachment text against the spam regular expressions | (enabled) |
+| ={Plugins}{AntiWikiSpamPlugin}{CheckAttachments}= | Enable to check attachment text against the spam regular expressions | (disabled) |
 | ={Plugins}{AntiWikiSpamPlugin}{CheckRegistrations}= | Enable to check Registrations against the white and black lists. | (enabled) |
+| ={Plugins}{AntiWikiSpamPlugin}{AutoUpdateSignatures}= | Enable to auto-download spam signatures. | (disabled) |
 | ={Plugins}{AntiWikiSpamPlugin}{ANTISPAMREGEXLISTURL}= | URL containing the public list of regular expressions used to block spam. The default list is provided by !MoinMoin. | http://arch.thinkmo.de/cgi-bin/spam-merge |
 | ={Plugins}{AntiWikiSpamPlugin}{LOCALANTISPAMREGEXLISTTOPIC}= | A topic containing a list of local regular expressions. A sample topic is provided. | %SYSTEMWEB%.AntiWikiSpamLocalList |
 | ={Plugins}{AntiWikiSpamPlugin}{GETLISTTIMEOUT}= | Maximum age of the public regular expression list in minutes. When age is exceeded, an updated list will be fetched | 60 |
@@ -77,12 +99,6 @@ the spam filter:
 | ={Plugins}{AntiWikiSpamPlugin}{HitThreshold}= | Number of regex hits required to block the save. Set to -1 to simulate operation.  | 1 |
 | ={Plugins}{AntiWikiSpamPlugin}{RegistrationWhiteList}= | Name of topic containing regular expressions that permit registration by matching email domains. | %SYSTEMWEB%.AntiWikiSpamRegistrationWhiteList |
 | ={Plugins}{AntiWikiSpamPlugin}{RegistrationBlackList}= | Name of topic containing regular expressions that deny registration by matching email domains. | %SYSTEMWEB%.AntiWikiSpamRegistrationBlackList |
-
----++ Registration
-
-Registration is controlled by limiting the email domains that can be used by people registering to the wiki. For example, you can set up a whitelist so that only people with a corporate email address can register, or set up a blacklist to filter known email hosts that spammers use.
-
-The lists are held in topics, usually called %SYSTEMWEB%.AntiWikiSpamRegistrationWhiteList and %SYSTEMWEB%.AntiWikiSpamRegistrationWhiteList. Sample topics are provided. Each topic is a simple list of Perl regular expressions. At least one expression in the whitelist must match the email address to permit registration. If any expression in the blacklist matches, registration will be denied.
 
 ---++ Installation Instructions
 
@@ -98,11 +114,15 @@ To cause a true failure, remove the VIEW and CHANGE restrictions to the topic an
 ---++ Info
 <sticky>
 |  Author(s): | Foswiki:Main.SvenDowideit - http://fosiki.com |
-|  Copyright: | &copy; 2005-2009 SvenDowideit @fosiki.com %BR% &copy; 2012 George Clark %BR% &copy; 2012 Crawford Currie http://c-dot.co.uk |
+|  Copyright: | &copy; 2005-2009 SvenDowideit @fosiki.com %BR% &copy; 2012-2014 George Clark %BR% &copy; 2012 Crawford Currie http://c-dot.co.uk |
 |  License: | [[http://www.gnu.org/licenses/gpl3.html][GPL 3 (Gnu General Public License)]] |
 |  Version: | %$VERSION% |
 |  Release: | %$RELEASE% |
 |  Change History: | <!-- versions below in reverse order --> |
+|  1.6 (24 Apr 2014) | Foswikitask:Item12349, Foswikitask:Item12629: Download of signatures brings down performance<br />\
+                       Foswikitask:Item12410, Foswikitask:Item12634: Attachment upload fails as checking them exceeds backend resources<br />\
+                       Foswikitask:Item12411: rest validates the CSRF signature even if validation disabled in core.<br />\
+                       Foswikitask:Item12699: Removing a user should also remove any cgisess files to kill current sessions. |
 |  1.5 (31 Dec 2012) | Foswikitask:Item12296: !BypassGroup doesn't work, also unit tests don't work on trunk.%BR%\
                        Foswikitask:Item12323: Fails to remove user topic on Foswiki 1.1.x |
 |  1.4 (10 Aug 2012) | Foswikitask:Item11679: When removing a user, remove it from any groups.<br />\

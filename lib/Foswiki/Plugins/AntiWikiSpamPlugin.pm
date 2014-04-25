@@ -19,8 +19,8 @@ use strict;
 require Foswiki::Func;       # The plugins API
 require Foswiki::Plugins;    # For the API version
 
-our $VERSION           = '1.5';
-our $RELEASE           = '1.5';
+our $VERSION           = '1.6';
+our $RELEASE           = '1.6';
 our $SHORTDESCRIPTION  = 'Lightweight wiki spam prevention';
 our $NO_PREFS_IN_TOPIC = 1;
 
@@ -41,9 +41,9 @@ sub initPlugin {
     Foswiki::Func::registerRESTHandler(
         'removeUser', \&_RESTremoveUser,
         authenticate => 1,
-        validate    => $Foswiki::cfg{Validation}{Method} eq 'strikeone' ? 1 : 0,
-        http_allow  => 'POST',
-        description => 'Allow administrators to remove registered users.',
+        validate     => $Foswiki::cfg{Validation}{Method} eq 'none' ? 0 : 1,
+        http_allow   => 'POST',
+        description  => 'Allow administrators to remove registered users.',
 
     );
 
@@ -104,21 +104,38 @@ sub registrationHandler {
     return Foswiki::Plugins::AntiWikiSpamPlugin::Core::registrationHandler(@_);
 }
 
-#### REST handlers
+=begin TML
 
-# can be used to force an update of the spam list
-# %SCRIPTURL%/rest/AntiWikiSpamPlugin/forceUpdate
+---+ REST handlers
+---++ =sub _RESTforceUpdate=
+
+
+Can be used to force an update of the spam list
+
+Must be called using POST.
+
+=cut
+
 sub _RESTforceUpdate {
     require Foswiki::Plugins::AntiWikiSpamPlugin::Core;
     return Foswiki::Plugins::AntiWikiSpamPlugin::Core::_RESTforceUpdate(@_);
 }
 
-# Remove a user. Expunge them utterly.
-# Passed with param: user, which can be a wikiname or a login name
-# Calls the removeUser function to remove the registration
-# Moves the user topic to SuspectSpammer
-# %SCRIPTURL%/rest/AntiWikiSpamPlugin/removeUser?user=name
-# name can be a wikiname or a login name
+=begin TML
+
+---++ =sub _RESTremoveuser=
+
+
+Remove a user. Expunge them utterly.
+
+Passed with param: user, which can be a wikiname or a login name
+
+Calls the removeUser function to remove the registration
+   * Moves the user topic to SuspectSpammer
+   * Must be called using POST.
+
+=cut
+
 sub _RESTremoveUser {
     require Foswiki::Plugins::AntiWikiSpamPlugin::Core;
     return Foswiki::Plugins::AntiWikiSpamPlugin::Core::_RESTremoveUser(@_);

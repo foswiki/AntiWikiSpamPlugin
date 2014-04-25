@@ -4,9 +4,12 @@
 # Should topic text be checked against the spam regular expression list?
 $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckTopics} = $TRUE;
 
-# **BOOLEAN**
+# **BOOLEAN EXPERT**
 # Should attachment contents be checked against the spam regular expression list?
-$Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckAttachments} = $TRUE;
+# <b>WARNING</b>: Checking attachments could cause a high CPU load on the server.
+# It is recommended to us an Antivirus scanner for attachments instead of this
+# plugin.
+$Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckAttachments} = $FALSE;
 
 # **BOOLEAN**
 # Should registrations be checked by the plugin?
@@ -15,14 +18,24 @@ $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckRegistrations} = $TRUE;
 # **URL**
 # URL where plugin should retrive the list of regular expressions that match spam postings.
 # The default site provides the MoinMoin antispam list: http://arch.thinkmo.de/cgi-bin/spam-merge
+# <b>Caution</b>: If this site is not reachable, it can seriously degrade updates to the wiki.
 $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{ANTISPAMREGEXLISTURL} = 'http://arch.thinkmo.de/cgi-bin/spam-merge';
 
 # **STRING 40**
 # Local topic name containing list of regular expressions that match spam postings.
 $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{LOCALANTISPAMREGEXLISTTOPIC} = '$Foswiki::cfg{SystemWebName}.AntiWikiSpamLocalList';
 
+# **BOOLEAN**
+# Enable automatic maintenance of spam signatures. Unless this is enabled, you will need to install a cronjob to update
+# spam signatures regularly (See the documentation).
+# <b>WARNING</b>: As the update process happens as part of a save or upload action downloading and merging
+# signatures could cause timeouts and failures of operation. It is recommended to enable this only when maintenance using
+# a cronjob isn't possible.
+$Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{AutoUpdateSignatures} = $FALSE;
+
 # **NUMBER**
-# Age in minutes of the regular expression list, after which a new list will be retrieved.
+# Age in minutes of the regular expression list.  If this age is exceeded, and <tt>{AutoUpdateSignatures}</tt> is enabled, then 
+# a new signature file will be downloaded during the next topic save.   This can slow down your wiki.
 $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{GETLISTTIMEOUT} = 60;
 
 # **STRING 40**

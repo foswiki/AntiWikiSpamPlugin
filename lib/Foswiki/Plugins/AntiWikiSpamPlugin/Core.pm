@@ -42,6 +42,11 @@ sub beforeAttachmentSaveHandler {
 
     _getPluginPrefs();
 
+    #SMELL:  This is probably worthtess:
+    # - It is extremely costly to regex scan large attachments
+    # - It does nothing to address obfuscated scripts
+    # - As of version 1.6, disabled by default.
+
     #from BlackListPlugin
     # check for evil eval() spam in <script>
     if ( $text =~ /<script.*?eval *\(.*?<\/script>/gis )
@@ -271,6 +276,9 @@ sub _downloadRegexUpdate {
     my $forceFlag = shift;
 
     unless ($forceFlag) {
+        return
+          unless (
+            $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{AutoUpdateSignatures} );
         my $timesUp;
         my $topicExists = _workFileExists( ${pluginName} . '_regexs' );
         if ($topicExists) {
@@ -327,14 +335,17 @@ sub _checkText {
         $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{LOCALANTISPAMREGEXLISTTOPIC},
         "$web.$topic"
     );
-    if ($regexs) {
-        _writeDebug("LOCAL Regexes \n($regexs)\n");
-        _checkTextUsingRegex( $web, $topic, $regexs, $_[0] ) if length($regexs);
+    if (@$regexs) {
+        _writeDebug( "LOCAL Regexes: " . scalar @$regexs );
+        _checkTextUsingRegex( $web, $topic, $regexs, $_[0] );
     }
 
     # use the share spam regexs
     $regexs = _makeRegexList( _readWorkFile( ${pluginName} . '_regexs' ) );
-    _checkTextUsingRegex( $web, $topic, $regexs, $_[0] );
+    if (@$regexs) {
+        _writeDebug( "PUBLIC Regexes: " . scalar @$regexs );
+        _checkTextUsingRegex( $web, $topic, $regexs, $_[0] );
+    }
     return;
 }
 
@@ -346,7 +357,7 @@ sub _checkTextUsingRegex {
     my $topic  = shift;
     my $regexs = shift;
 
-    _writeDebug("Checking - HITS start at $hits");
+    _writeDebug("Checking $web.$topic  - HITS start at $hits ");
 
     foreach my $regex (@$regexs) {
 
