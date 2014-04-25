@@ -45,7 +45,8 @@ To manually update the list, click
 
 The retrieve of the !MoinMoin regex list can still take some seconds which will delay topic saves when the list needs to be refreshed.  Good
 network connectivity is a must.  If the configured server is not reachable, then save will be delayed or fail.
-The recommended solution is to refresh the list using the provided =rest= script from a scheduled cron job, and disable =$Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{AutoUpdateSignatures}=  (This is now the default configuration)
+The recommended solution is to refresh the list using the provided =rest= script from a scheduled cron job,
+and disable =$Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{AutoUpdateSignatures}=  (This is now the default configuration)
 <verbatim>
 cd [foswiki-bin-directory]
 ./rest /AntiWikiSpamPlugin/forceUpdate</verbatim>
@@ -56,6 +57,7 @@ The ouptut is sent to a logfile.
 10      *       *       *       *       cd /path/to/foswiki/bin && perl -T rest /AntiWikiSpamPlugin/forceUpdate  /path/to/foswiki/working/logs/LastSpamUpdate.log 2>&1
 </verbatim>
 
+%X% *Caution:* Be sure to run the rest script under the control of the web server user; =apache=, =www=, etc.   If run as root, the ownership of the logfiles can change, which will cause an outage for your wiki.
 
 ---+++ Registration control
 
