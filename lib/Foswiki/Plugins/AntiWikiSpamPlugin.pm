@@ -19,8 +19,8 @@ use strict;
 require Foswiki::Func;       # The plugins API
 require Foswiki::Plugins;    # For the API version
 
-our $VERSION           = '1.6';
-our $RELEASE           = '1.6';
+our $VERSION           = '1.7';
+our $RELEASE           = '1.7';
 our $SHORTDESCRIPTION  = 'Lightweight wiki spam prevention';
 our $NO_PREFS_IN_TOPIC = 1;
 
@@ -32,9 +32,13 @@ sub initPlugin {
     #forceUpdate
     Foswiki::Func::registerRESTHandler(
         'forceUpdate', \&_RESTforceUpdate,
-        authenticate => 1,
-        validate     => 0,
-        http_allow   => 'POST',
+        validate => 0,
+
+    # SMELL: Foswiki 1.1.x is broken - in CLI environment.
+    # It checks for authentication, and sets the script name as the method.
+    # Code still requires Admin authority, so it's safe to disable these checks.
+        authenticate => 0,
+        http_allow   => 'REST,POST',
         description  => 'Run a manual update of the spam regular expressions.',
     );
 
