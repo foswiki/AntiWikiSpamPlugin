@@ -54,7 +54,7 @@ cd [foswiki-bin-directory]
 Here is a sample =crontab= entry to run the signature refresh at 10 past the hour.
 The ouptut is sent to a logfile.
 <verbatim>
-10      *       *       *       *       cd /path/to/foswiki/bin && perl -T rest /AntiWikiSpamPlugin/forceUpdate  /path/to/foswiki/working/logs/LastSpamUpdate.log 2>&1
+10      *       *       *       *       cd /path/to/foswiki/bin && perl -T rest /AntiWikiSpamPlugin/forceUpdate > /path/to/foswiki/working/logs/LastSpamUpdate.log 2>&1
 </verbatim>
 
 %X% *Caution:* Be sure to run the rest script under the control of the web server user; =apache=, =www=, etc.   If run as root, the ownership of the logfiles can change, which will cause an outage for your wiki.
