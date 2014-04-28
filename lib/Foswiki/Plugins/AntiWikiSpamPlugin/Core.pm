@@ -335,14 +335,14 @@ sub _checkText {
         $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{LOCALANTISPAMREGEXLISTTOPIC},
         "$web.$topic"
     );
-    if (@$regexs) {
+    if ( defined $regexs && scalar @$regexs ) {
         _writeDebug( "LOCAL Regexes: " . scalar @$regexs );
         _checkTextUsingRegex( $web, $topic, $regexs, $_[0] );
     }
 
     # use the share spam regexs
     $regexs = _makeRegexList( _readWorkFile( ${pluginName} . '_regexs' ) );
-    if (@$regexs) {
+    if ( defined $regexs && scalar @$regexs ) {
         _writeDebug( "PUBLIC Regexes: " . scalar @$regexs );
         _checkTextUsingRegex( $web, $topic, $regexs, $_[0] );
     }

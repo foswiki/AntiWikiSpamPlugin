@@ -19,8 +19,8 @@ use strict;
 require Foswiki::Func;       # The plugins API
 require Foswiki::Plugins;    # For the API version
 
-our $VERSION           = '1.7';
-our $RELEASE           = '1.7';
+our $VERSION           = '1.8';
+our $RELEASE           = '1.8';
 our $SHORTDESCRIPTION  = 'Lightweight wiki spam prevention';
 our $NO_PREFS_IN_TOPIC = 1;
 
