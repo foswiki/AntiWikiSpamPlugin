@@ -30,6 +30,8 @@ sub set_up {
     $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckTopics}          = 1;
     $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckAttachments}     = 1;
     $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckRegistrations}   = 1;
+    $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{MeaningfulCount}      = '0';
+    $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{MeaningfulWebs}       = '.*';
     $Foswiki::cfg{Register}{NeedVerification}                        = 0;
     $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{ANTISPAMREGEXLISTURL} = '';
     undef $Foswiki::Plugins::AntiWikiSpamPlugin::Core::regoWhite;
@@ -132,6 +134,7 @@ badrobot
 ^76\.74\.239\.26 # mailinator.com
 ^72\.51\.33\.80 # another mailinator address
 ^207\.198\.106\.56 # and another
+^23\.239\.11\.30 # and more
 </verbatim>
 TEXT
     $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{RegistrationWhiteList} =
@@ -144,6 +147,8 @@ TEXT
     $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckTopics}          = 1;
     $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckAttachments}     = 1;
     $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckRegistrations}   = 1;
+    $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{MeaningfulCount}      = '0';
+    $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{MeaningfulWebs}       = '.*';
     $Foswiki::cfg{Register}{NeedVerification}                        = 0;
     $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{ANTISPAMREGEXLISTURL} = '';
 
@@ -230,6 +235,8 @@ TEXT
     }
     catch Foswiki::OopsException with {
         my $e = shift;
+        use Data::Dumper;
+        print STDERR Data::Dumper::Dumper( \$e );
         $this->assert_num_equals( 500, $e->{status} );
         $this->assert_matches( qr/triggered the spam filter/,
             $e->{params}->[0] );
@@ -259,6 +266,8 @@ TEXT
     }
     catch Foswiki::OopsException with {
         my $e = shift;
+        use Data::Dumper;
+        print STDERR Data::Dumper::Dumper( \$e );
         $this->assert_num_equals( 200, $e->{status} );
         $this->assert_matches(
 qr/A confirmation e-mail has been sent to mustapha\@mustapha.good.time.info/,

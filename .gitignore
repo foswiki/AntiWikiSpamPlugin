@@ -1,0 +1,10 @@
+*,v
+*,pfv
+*.gz
+/AntiWikiSpamPlugin.md5
+/AntiWikiSpamPlugin.sha1
+/AntiWikiSpamPlugin.tgz
+/AntiWikiSpamPlugin.txt
+/AntiWikiSpamPlugin.zip
+/AntiWikiSpamPlugin_installer
+/AntiWikiSpamPlugin_installer.pl

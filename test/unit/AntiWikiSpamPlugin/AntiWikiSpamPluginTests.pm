@@ -33,6 +33,8 @@ sub loadExtraConfig {
     $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckTopics}          = 1;
     $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckAttachments}     = 1;
     $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckRegistrations}   = 1;
+    $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{MeaningfulCount}      = '0';
+    $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{MeaningfulWebs}       = '.*';
     $Foswiki::cfg{Register}{NeedVerification}                        = 0;
     $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{ANTISPAMREGEXLISTURL} = '';
 }

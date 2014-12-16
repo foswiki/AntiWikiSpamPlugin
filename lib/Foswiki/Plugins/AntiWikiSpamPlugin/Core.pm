@@ -81,6 +81,8 @@ sub validateRegistrationHandler {
     my $data = shift;
 
     if ( $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{MeaningfulCount} ) {
+        print STDERR
+"MeaningfulCount = $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{MeaningfulCount} ============ \n";
 
         my $uhist = Foswiki::Func::getSessionValue('userHistory') || '';
         my @hist = split( /:/, $uhist );

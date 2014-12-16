@@ -22,6 +22,12 @@ $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckRegistrations} = $TRUE;
 # that match this web regex in the user's session for guest users.
 $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{MeaningfulWebs} = '.*';
 
+# **STRING 40**
+# Regular expression of topics that should not be counted toward activity before allowing registration
+# Often spammer bots jump right into registration. The plugin tracks visited web.topics
+# that match this web regex in the user's session for guest users.
+$Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{IgnoredTopics} = '^(UserRegistration|WikiUsers|Web.*)$';
+
 # **NUMBER**
 # Minimum activity count for user in the "Meaningful" webs.   Guests will be blocked
 # from registering unless they have visited at least this count of topics.

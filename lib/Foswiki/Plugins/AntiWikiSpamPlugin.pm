@@ -19,8 +19,8 @@ use strict;
 require Foswiki::Func;       # The plugins API
 require Foswiki::Plugins;    # For the API version
 
-our $VERSION           = '1.8';
-our $RELEASE           = '1.8';
+our $VERSION           = '1.9';
+our $RELEASE           = '1.9';
 our $SHORTDESCRIPTION  = 'Lightweight wiki spam prevention';
 our $NO_PREFS_IN_TOPIC = 1;
 
@@ -30,10 +30,14 @@ sub initPlugin {
     my ( $topic, $web, $user, $installWeb ) = @_;
 
     if (   $user eq $Foswiki::cfg{DefaultUserLogin}
-        && $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{MeaningfulCount} )
+        && $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{MeaningfulCount}
+        && $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{MeaningfulWebs}
+        && $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{IgnoredTopics} )
     {
         if ( $web =~
-            m/$Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{MeaningfulWebs}/ )
+            /$Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{MeaningfulWebs}/
+            && $topic !~
+            m/$Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{IgnoredTopics}/ )
         {
             my $uhist = Foswiki::Func::getSessionValue('userHistory') || '';
             my @hist = split( /:/, $uhist );
