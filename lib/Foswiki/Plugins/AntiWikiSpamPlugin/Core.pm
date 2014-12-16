@@ -80,6 +80,30 @@ sub beforeAttachmentSaveHandler {
 sub validateRegistrationHandler {
     my $data = shift;
 
+    if ( $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{MeaningfulCount} ) {
+
+        my $uhist = Foswiki::Func::getSessionValue('userHistory') || '';
+        my @hist = split( /:/, $uhist );
+        if (
+            scalar @hist <
+            $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{MeaningfulCount} )
+        {
+            require Foswiki::OopsException;
+            $Foswiki::Plugins::SESSION->logger->log( 'warning',
+"Registration of $data->{WikiName} ($data->{Email}) rejected by AntiWikiSpamPlugin. "
+                  . scalar @hist
+                  . " actions found, need $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{MeaningfulCount}: "
+                  . join( ", ", @hist ) );
+            throw Foswiki::OopsException(
+                'attention',
+                web    => $data->{webName},
+                topic  => $data->{WikiName},
+                def    => 'registration_disabled',
+                params => ["activity triggered the spam filter"]
+            );
+        }
+    }
+
     # $data contains at least: WikiName FirstName LastName Email
     # May also contain: Photo Password Confirm AddToGroups
     # Anything else is not used by Registration

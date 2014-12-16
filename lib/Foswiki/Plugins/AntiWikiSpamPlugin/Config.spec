@@ -16,6 +16,18 @@ $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckAttachments} = $FALSE;
 # newer can also use the Registration EmailFilter for a simpler email address check
 $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckRegistrations} = $TRUE;
 
+# **STRING 40**
+# Regular expression of webs that should have activity before allowing registration
+# Often spammer bots jump right into registration. The plugin tracks visited web.topics
+# that match this web regex in the user's session for guest users.
+$Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{MeaningfulWebs} = '.*';
+
+# **NUMBER**
+# Minimum activity count for user in the "Meaningful" webs.   Guests will be blocked
+# from registering unless they have visited at least this count of topics.
+# Set to zero to disable tracking of guest activity.
+$Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{MeaningfulCount} = 10;
+
 # **URL**
 # URL where plugin should retrive the list of regular expressions that match spam postings.
 # The default site provides the MoinMoin antispam list: http://arch.thinkmo.de/cgi-bin/spam-merge
