@@ -1,4 +1,4 @@
-%META:TOPICINFO{author="ProjectContributor" date="1418748907" format="1.1" version="1"}%
+%META:TOPICINFO{author="ProjectContributor" date="1426127080" format="1.1" version="1"}%
 ---+!! !AntiWikiSpamPlugin
 
 <!--
@@ -130,6 +130,7 @@ To cause a true failure, remove the VIEW and CHANGE restrictions to the topic an
 |  Version: | %$VERSION% |
 |  Release: | %$RELEASE% |
 |  Change History: | <!-- versions below in reverse order --> |
+|  1.91 (11 Mar 2015) | Foswikitask:Item13296: Add oops template for better error messages. |
 |  1.9 (16 Dec 2014) | Foswikitask:Item13145: Add some access profiling, Foswikitask:Item13047: Typo in DEPENDENCIES |
 |  1.8 (28 Apr 2014) | Foswikitask:Item12874: Crash due to undefined array reference | 
 |  1.7 (25 Apr 2014) | Typo in documentation |

@@ -61,12 +61,10 @@ sub beforeAttachmentSaveHandler {
         {                      # and Sensitivity not set to simulate
 
             throw Foswiki::OopsException(
-                'attention',
-                def   => 'attach_error',
                 web   => $_[2],
                 topic => $_[1],
-                params =>
-'The attachment has been rejected as it contains a possible javascript eval exploit.'
+                'antiwikispam',
+                def => 'attachment_rejected',
             );
         }
     }
@@ -97,11 +95,10 @@ sub validateRegistrationHandler {
                   . " actions found, need $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{MeaningfulCount}: "
                   . join( ", ", @hist ) );
             throw Foswiki::OopsException(
-                'attention',
-                web    => $data->{webName},
-                topic  => $data->{WikiName},
-                def    => 'registration_disabled',
-                params => ["activity triggered the spam filter"]
+                'antiwikispam',
+                def   => 'registration_cancelled',
+                topic => 'UserRegistration',
+                web   => $Foswiki::cfg{SystemWebName},
             );
         }
     }
@@ -184,7 +181,13 @@ sub validateRegistrationHandler {
         $Foswiki::Plugins::SESSION->logger->log( 'warning',
 "Registration of $data->{WikiName} ($data->{Email}) rejected by AntiWikiSpamPlugin: white: $white black: $black"
         );
-        throw Error::Simple("'$data->{Email}' triggered the spam filter");
+        throw Foswiki::OopsException(
+            'antiwikispam',
+            def    => 'registration_blocked',
+            topic  => 'UserRegistration',
+            web    => $Foswiki::cfg{SystemWebName},
+            params => [ $data->{Email} ],
+        );
     }
 }
 
@@ -201,21 +204,14 @@ sub registrationHandler {
     };
 
     return unless ($error);
+    use Data::Dumper;
+    print STDERR Data::Dumper::Dumper( \$error );
 
     # Remove the user
     my ( $m, $lm ) = _removeUser( $data->{WikiName} );
 
-    require Foswiki::OopsException;
-    $Foswiki::Plugins::SESSION->logger->log( 'warning',
-"Registration of $data->{WikiName} ($data->{Email}) rejected by AntiWikiSpamPlugin"
-    );
-    throw Foswiki::OopsException(
-        'attention',
-        web    => $data->{webName},
-        topic  => $data->{WikiName},
-        def    => 'registration_disabled',
-        params => ["'$data->{Email}' triggered the spam filter"]
-    );
+    # Propagate the error upwards.
+    $error->throw();
 }
 
 sub _RESTforceUpdate {
@@ -403,12 +399,10 @@ sub _checkTextUsingRegex {
 
                 # TODO: make this a nicer error, or make its own template
                 throw Foswiki::OopsException(
-                    'attention',
-                    def   => 'save_error',
+                    'antiwikispam',
                     web   => $web,
                     topic => $topic,
-                    params =>
-"The text of topic $web.$topic has been rejected as it may contain spam."
+                    def   => 'save_rejected',
                 );
             }
         }

@@ -1,0 +1,21 @@
+%{ Templates for AntiWikiSpamPlugin messages. One DEF is selected and inserted at %INSTANTIATE }%
+%TMPL:INCLUDE{"oops"}%
+
+
+%TMPL:DEF{"titleaction"}%AntiWikiSpamPlugin%TMPL:END%
+%TMPL:DEF{"webaction"}%%TMPL:END%
+%TMPL:DEF{"heading"}%%MAKETEXT{"AntiWikiSpam Intercept"}%%TMPL:END%
+
+%{ Selected by def= option }%
+%TMPL:DEF{"save_rejected"}% *%MAKETEXT{"The text of this topic has been rejected as it may contain spam."}%* %TMPL:END%
+%TMPL:DEF{"attachment_rejected"}%%MAKETEXT{"The attachment has been rejected as it contains a suspicious JavaScript code."}% %TMPL:END%
+%TMPL:DEF{"registration_blocked"}% *%MAKETEXT{"The e-mail address ([_1]) is not acceptable to this site." args="%PARAM1%"}%* %TMPL:END%
+%TMPL:DEF{"registration_cancelled"}% *%MAKETEXT{"The registration request has been cancelled. Your browsing history on this site is suspicious."}%* %TMPL:END%
+%TMPL:DEF{"topicactionbuttons"}% <span>[[%WEB%.%TOPIC%][%MAKETEXT{"OK"}%]]</span> %TMPL:END%
+
+%TMPL:DEF{"message"}%
+%INSTANTIATE%
+
+%MAKETEXT{"Contact the site administrator if you believe that this is an error"}%
+
+%TMPL:END%
