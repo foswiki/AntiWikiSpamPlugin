@@ -19,8 +19,8 @@ use strict;
 require Foswiki::Func;       # The plugins API
 require Foswiki::Plugins;    # For the API version
 
-our $VERSION           = '1.91';
-our $RELEASE           = '1.91';
+our $VERSION           = '1.92';
+our $RELEASE           = '1.92';
 our $SHORTDESCRIPTION  = 'Lightweight wiki spam prevention';
 our $NO_PREFS_IN_TOPIC = 1;
 
@@ -173,7 +173,7 @@ __END__
 Plugin for Foswiki - The Free and Open Source Wiki, http://foswiki.org/
 
 Copyright (C) 2005-2009 Sven Dowideit SvenDowideit@wikiring.com
-Copyright (C) 2009-2014 George Clark
+Copyright (C) 2009-2015 George Clark and Foswiki Contributors
 Copyright (C) 2012 Crawford Currie http://c-dot.co.uk
 
 AntiWikiSpamPlugin is distributed in the hope that it will be useful,

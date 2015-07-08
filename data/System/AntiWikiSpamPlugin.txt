@@ -1,4 +1,4 @@
-%META:TOPICINFO{author="ProjectContributor" date="1426127080" format="1.1" version="1"}%
+%META:TOPICINFO{author="ProjectContributor" date="1436315461" format="1.1" version="1"}%
 ---+!! !AntiWikiSpamPlugin
 
 <!--
@@ -27,7 +27,8 @@ All its processing is _only_ done on =save=, or on =attach=.  (Foswiki:Extension
 
    * User registration features
       * Checks new registrations against White and Black lists by either domain or IP address.
-      * Provides a facility to remove users.
+      * Provides a facility to remove users. (Not needed in Foswiki 2.0.0)
+      * Provides a way to track user activity and block registration with insufficient activity.
 
 The attachment scan for spam strings and some javascript exploits is extremely slow and not recommended, especially for large binary attachments. This
 feature is now disabled by default.
@@ -73,6 +74,11 @@ The core foswiki feature, added in Foswiki-1.1.5, provides a similar facility bu
 The core filter is set as an expert parameter in the Foswiki configuration ={Register}{EmailFilter}=, in the "Security and Authentication" section, Registration tab.
 The White and Black lists provided by this extension will do a DNS lookup and can also block by IP Address of the registrant.
 
+This extension can also track guest activity by recording the last "n" topic views in their Session. When the user registers, this list is compared to a
+filter of "interesting" webs and topics.  If the user has insufficient interesting activity, the registration is blocked. This can be used to prevent "bot" registrations that
+post registration requests without visiting topics.  Note that users who leave and then come back to register lose their session history and may find the
+registration process difficult.
+
 ---+++ Removing User Accounts
 
 Normally user accounts should not be removed, as they represent the history of topic changes.  In addition if the WikiName is reused, the new user "assumes"
@@ -91,12 +97,12 @@ provides a REST handler that can remove user accounts from the wiki, which you c
 <input type="submit" class="foswikiSubmit" value="Remove User" />
 </form>
 
-This feature will be included as a core Foswiki feature in Foswiki 1.2.
+This feature has been included as a core Foswiki feature in Foswiki 2.0.
 
 ---++ Configuration
 
 The configuration of this plugin is done using the %SCRIPTURL{"configure"}% tool:
-
+<noautolink>
 %TABLE{sort="off"}%
 | *Setting* | *Definition* | *Default* |
 | ={Plugins}{AntiWikiSpamPlugin}{CheckTopics}= | Enable to check topic text against the spam regular expressions | (enabled) |
@@ -110,6 +116,10 @@ The configuration of this plugin is done using the %SCRIPTURL{"configure"}% tool
 | ={Plugins}{AntiWikiSpamPlugin}{HitThreshold}= | Number of regex hits required to block the save. Set to -1 to simulate operation.  | 1 |
 | ={Plugins}{AntiWikiSpamPlugin}{RegistrationWhiteList}= | Name of topic containing regular expressions that permit registration by matching email domains. | %SYSTEMWEB%.AntiWikiSpamRegistrationWhiteList |
 | ={Plugins}{AntiWikiSpamPlugin}{RegistrationBlackList}= | Name of topic containing regular expressions that deny registration by matching email domains. | %SYSTEMWEB%.AntiWikiSpamRegistrationBlackList |
+| ={Plugins}{AntiWikiSpamPlugin}{MeaningfulWebs}= | Regular expression, matches webnames that are deemed "interesting" for registration purposes. | '.*' |
+| ={Plugins}{AntiWikiSpamPlugin}{IgnoredTopics}= | Topics that will not be counted toward the "meaningful" threshold | '^(UserRegistration%VBAR%WikiUsers%VBAR%Web.*)$' |
+| ={Plugins}{AntiWikiSpamPlugin}{MeaningfulCount}= | Count of topic views needed to open up registration. Set to 0 to disable the check. | 0 |
+</noautolink>
 
 ---++ Installation Instructions
 
@@ -125,11 +135,12 @@ To cause a true failure, remove the VIEW and CHANGE restrictions to the topic an
 ---++ Info
 <sticky>
 |  Author(s): | Foswiki:Main.SvenDowideit - http://fosiki.com |
-|  Copyright: | &copy; 2005-2009 SvenDowideit @fosiki.com %BR% &copy; 2012-2014 George Clark %BR% &copy; 2012 Crawford Currie http://c-dot.co.uk |
+|  Copyright: | &copy; 2005-2009 SvenDowideit @fosiki.com %BR% &copy; 2012-2015 George Clark & Foswiki Contributors %BR% &copy; 2012 Crawford Currie http://c-dot.co.uk |
 |  License: | [[http://www.gnu.org/licenses/gpl3.html][GPL 3 (Gnu General Public License)]] |
 |  Version: | %$VERSION% |
 |  Release: | %$RELEASE% |
 |  Change History: | <!-- versions below in reverse order --> |
+|  1.92 (08 Jul 2015) | Foswikitask:Item13296: Document, and disable access profiling by default. |
 |  1.91 (11 Mar 2015) | Foswikitask:Item13296: Add oops template for better error messages. |
 |  1.9 (16 Dec 2014) | Foswikitask:Item13145: Add some access profiling, Foswikitask:Item13047: Typo in DEPENDENCIES |
 |  1.8 (28 Apr 2014) | Foswikitask:Item12874: Crash due to undefined array reference | 

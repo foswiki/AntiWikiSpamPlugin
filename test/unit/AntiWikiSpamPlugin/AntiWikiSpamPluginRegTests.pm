@@ -178,8 +178,7 @@ TEXT
     catch Foswiki::OopsException with {
         my $e = shift;
         $this->assert_num_equals( 500, $e->{status} );
-        $this->assert_matches( qr/triggered the spam filter/,
-            $e->{params}->[0] );
+        $this->assert_equals( 'registration_blocked', $e->{def} );
     }
     otherwise {
         $this->assert( 0, 'SPAM Registration was permitted' );
@@ -207,8 +206,7 @@ TEXT
     catch Foswiki::OopsException with {
         my $e = shift;
         $this->assert_num_equals( 500, $e->{status} );
-        $this->assert_matches( qr/triggered the spam filter/,
-            $e->{params}->[0] );
+        $this->assert_equals( 'registration_blocked', $e->{def} );
     }
     otherwise {
         $this->assert(0);
@@ -235,11 +233,8 @@ TEXT
     }
     catch Foswiki::OopsException with {
         my $e = shift;
-        use Data::Dumper;
-        print STDERR Data::Dumper::Dumper( \$e );
         $this->assert_num_equals( 500, $e->{status} );
-        $this->assert_matches( qr/triggered the spam filter/,
-            $e->{params}->[0] );
+        $this->assert_equals( 'registration_blocked', $e->{def} );
     }
     otherwise {
         $this->assert(0);
@@ -266,8 +261,6 @@ TEXT
     }
     catch Foswiki::OopsException with {
         my $e = shift;
-        use Data::Dumper;
-        print STDERR Data::Dumper::Dumper( \$e );
         $this->assert_num_equals( 200, $e->{status} );
         $this->assert_matches(
 qr/A confirmation e-mail has been sent to mustapha\@mustapha.good.time.info/,

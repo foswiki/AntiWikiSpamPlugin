@@ -2,19 +2,19 @@
 # ---++ AntiWikiSpamPlugin
 # **BOOLEAN**
 # Should topic text be checked against the spam regular expression list?
-$Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckTopics} = $TRUE;
+$Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckTopics} = 1;
 
 # **BOOLEAN EXPERT**
 # Should attachment contents be checked against the spam regular expression list?
 # <b>WARNING</b>: Checking attachments could cause a high CPU load on the server.
 # It is recommended to us an Antivirus scanner for attachments instead of this
 # plugin.
-$Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckAttachments} = $FALSE;
+$Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckAttachments} = 0;
 
 # **BOOLEAN**
 # Should registrations be checked by the plugin?.  Foswiki versions 1.1.5 and
 # newer can also use the Registration EmailFilter for a simpler email address check
-$Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckRegistrations} = $TRUE;
+$Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{CheckRegistrations} = 0;
 
 # **STRING 40**
 # Regular expression of webs that should have activity before allowing registration
@@ -32,7 +32,7 @@ $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{IgnoredTopics} = '^(UserRegistration|
 # Minimum activity count for user in the "Meaningful" webs.   Guests will be blocked
 # from registering unless they have visited at least this count of topics.
 # Set to zero to disable tracking of guest activity.
-$Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{MeaningfulCount} = 10;
+$Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{MeaningfulCount} = 0;
 
 # **URL**
 # URL where plugin should retrive the list of regular expressions that match spam postings.
@@ -50,7 +50,7 @@ $Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{LOCALANTISPAMREGEXLISTTOPIC} = '$Fosw
 # <b>WARNING</b>: As the update process happens as part of a save or upload action downloading and merging
 # signatures could cause timeouts and failures of operation. It is recommended to enable this only when maintenance using
 # a cronjob isn't possible.
-$Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{AutoUpdateSignatures} = $FALSE;
+$Foswiki::cfg{Plugins}{AntiWikiSpamPlugin}{AutoUpdateSignatures} = 0;
 
 # **NUMBER**
 # Age in minutes of the regular expression list.  If this age is exceeded, and <tt>{AutoUpdateSignatures}</tt> is enabled, then 
