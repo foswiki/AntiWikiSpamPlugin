@@ -378,13 +378,14 @@ sub _checkTextUsingRegex {
     my $web    = shift;
     my $topic  = shift;
     my $regexs = shift;
+    my $text   = lc(shift);
 
     _writeDebug("Checking $web.$topic  - HITS start at $hits ");
 
     foreach my $regex (@$regexs) {
 
         #_writeDebug ("Checking for $regex ");
-        if ( $_[0] =~ /$regex/i ) {
+        if ( $text =~ /$regex/ ) {
             my $wikiName = Foswiki::Func::getWikiName();
             $hits++;
             Foswiki::Func::writeWarning(

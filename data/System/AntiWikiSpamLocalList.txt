@@ -1,3 +1,4 @@
+%META:TOPICINFO{author="ProjectContributor" date="1448929420" format="1.1" version="1"}%
 ---+!! !AntiWikiSpamLocalList
 
 ---++ List of local regular expressions

@@ -140,6 +140,7 @@ To cause a true failure, remove the VIEW and CHANGE restrictions to the topic an
 |  Version: | %$VERSION% |
 |  Release: | %$RELEASE% |
 |  Change History: | <!-- versions below in reverse order --> |
+|  1.93 (30 Nov 2015) | Foswikitask:Item13878: Change from case-insensitive regex for better performance. |
 |  1.92 (08 Jul 2015) | Foswikitask:Item13296: Document, and disable access profiling by default. |
 |  1.91 (11 Mar 2015) | Foswikitask:Item13296: Add oops template for better error messages. |
 |  1.9 (16 Dec 2014) | Foswikitask:Item13145: Add some access profiling, Foswikitask:Item13047: Typo in DEPENDENCIES |
